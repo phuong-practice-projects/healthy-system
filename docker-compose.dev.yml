@@ -3,9 +3,9 @@ version: '3.8'
 services:
   healthy-api:
     build:
-      context: ./Healthy.Api
+      context: ./Healthy
       dockerfile: Healthy.Api/Dockerfile
-      target: base  # Use base stage for development
+      target: build  # Use build stage for development with hot reload
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
@@ -14,11 +14,12 @@ services:
       - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
     volumes:
       # Mount source for live development
-      - ./Healthy.Api:/src
+      - ./Healthy:/src
       - /src/Healthy.Api/bin
       - /src/Healthy.Api/obj
+    command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
     ports:
-      - "5000:8080"
+      - "5001:8080"
     depends_on:
       - healthy-db
     networks:
