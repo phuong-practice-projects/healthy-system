@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  healthy-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true;
+      - ConnectionStrings__RedisConnection=healthy-redis:6379
+    # Remove volume mounts for production
+    volumes: []
+    # Only expose internal port
+    ports: []
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  healthy-db:
+    environment:
+      SA_PASSWORD: "${DB_PASSWORD}"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Standard"
+    # Don't expose DB port externally in production
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  healthy-redis:
+    # Don't expose Redis port externally in production
+    ports: []
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  healthy-nginx:
+    ports:
+      - "80:80"
+      - "443:443"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M

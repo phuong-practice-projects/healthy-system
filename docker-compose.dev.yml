@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  healthy-api:
+    build:
+      context: ./Healthy.Api
+      dockerfile: Healthy.Api/Dockerfile
+      target: base  # Use base stage for development
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
+    volumes:
+      # Mount source for live development
+      - ./Healthy.Api:/src
+      - /src/Healthy.Api/bin
+      - /src/Healthy.Api/obj
+    ports:
+      - "5000:8080"
+    depends_on:
+      - healthy-db
+    networks:
+      - healthy-network
+
+  healthy-db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: "Dev@Passw0rd123"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    volumes:
+      - healthy-db-dev-data:/var/opt/mssql
+    networks:
+      - healthy-network
+
+  # Remove nginx and redis for simple development
+  # healthy-redis:
+  # healthy-nginx:
+
+networks:
+  healthy-network:
+    driver: bridge
+
+volumes:
+  healthy-db-dev-data:
+    driver: local
