@@ -6,12 +6,8 @@ services:
       context: ./Healthy
       dockerfile: Healthy.Api/Dockerfile
       target: build  # Use build stage for development with hot reload
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:8080
-      - DOTNET_USE_POLLING_FILE_WATCHER=true
-      - DOTNET_RUNNING_IN_CONTAINER=true
-      - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
+    env_file:
+      - env.development
     volumes:
       # Mount source for live development
       - ./Healthy:/src
@@ -38,9 +34,16 @@ services:
     networks:
       - healthy-network
 
-  # Remove nginx and redis for simple development
-  # healthy-redis:
-  # healthy-nginx:
+  # Redis for caching (optional)
+  healthy-redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - healthy-redis-dev-data:/data
+    networks:
+      - healthy-network
+    command: redis-server --appendonly yes
 
 networks:
   healthy-network:
@@ -48,4 +51,6 @@ networks:
 
 volumes:
   healthy-db-dev-data:
+    driver: local
+  healthy-redis-dev-data:
     driver: local

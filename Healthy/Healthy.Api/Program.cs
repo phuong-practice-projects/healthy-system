@@ -1,8 +1,16 @@
 using Healthy.Application;
 using Healthy.Infrastructure;
-using Healthy.Api;
-using Microsoft.OpenApi.Models;
-using System.Reflection;
+using DotNetEnv;
+
+// Load environment variables from .env files
+var envFile = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development" 
+    ? "env.development" 
+    : ".env";
+
+if (File.Exists(envFile))
+{
+    Env.Load(envFile);
+}
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,12 +40,6 @@ builder.Services.AddApplication();
 
 // Add Infrastructure Layer
 builder.Services.AddInfrastructure(builder.Configuration);
-
-// Add MediatR
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-// Add AutoMapper
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 // Add HttpContextAccessor for CurrentUserService
 builder.Services.AddHttpContextAccessor();

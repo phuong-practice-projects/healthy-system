@@ -11,10 +11,14 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        // Get connection string from environment variable
+        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
+            ?? "Server=localhost;Database=HealthyDB;User Id=sa;Password=;TrustServerCertificate=true;";
+        
         // Add Database Context
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("DefaultConnection"),
+                connectionString,
                 b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
         // Add Application DbContext Interface
