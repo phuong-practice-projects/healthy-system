@@ -1,25 +1,25 @@
 version: '3.8'
 
 services:
-  healthy-api:
-    build:
-      context: ./Healthy
-      dockerfile: Healthy.Api/Dockerfile
-      target: build  # Use build stage for development with hot reload
-    env_file:
-      - env.development
-    volumes:
-      # Mount source for live development
-      - ./Healthy:/src
-      - /src/Healthy.Api/bin
-      - /src/Healthy.Api/obj
-    command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
-    ports:
-      - "5001:8080"
-    depends_on:
-      - healthy-db
-    networks:
-      - healthy-network
+  # healthy-api:
+  #   build:
+  #     context: ./Healthy
+  #     dockerfile: Healthy.Api/Dockerfile
+  #     target: build  # Use build stage for development with hot reload
+  #   env_file:
+  #     - env.development
+  #   volumes:
+  #     # Mount source for live development
+  #     - ./Healthy:/src
+  #     - /src/Healthy.Api/bin
+  #     - /src/Healthy.Api/obj
+  #   command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
+  #   ports:
+  #     - "5001:8080"
+  #   depends_on:
+  #     - healthy-db
+  #   networks:
+  #     - healthy-network
 
   healthy-db:
     image: mcr.microsoft.com/mssql/server:2022-latest

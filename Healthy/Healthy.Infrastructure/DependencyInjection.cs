@@ -19,7 +19,11 @@ public static class DependencyInjection
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 connectionString,
-                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
+                      .EnableRetryOnFailure(
+                          maxRetryCount: 3,
+                          maxRetryDelay: TimeSpan.FromSeconds(30),
+                          errorNumbersToAdd: null)));
 
         // Add Application DbContext Interface
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
@@ -27,6 +31,7 @@ public static class DependencyInjection
         // Add Services
         services.AddScoped<IDateTime, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IJwtService, JwtService>();
 
         return services;
     }
