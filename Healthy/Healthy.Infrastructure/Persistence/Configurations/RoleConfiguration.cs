@@ -10,7 +10,7 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
     {
         builder.ToTable("Roles");
 
-        builder.HasKey(r => r.Id);
+        // Primary key is inherited from EntityBase
 
         builder.Property(r => r.Name)
             .IsRequired()
@@ -25,7 +25,8 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
 
         // Indexes
         builder.HasIndex(r => r.Name)
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("IX_Roles_Name");
 
         // Relationships
         builder.HasMany(r => r.UserRoles)

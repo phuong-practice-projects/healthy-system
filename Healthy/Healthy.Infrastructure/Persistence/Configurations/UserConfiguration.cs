@@ -38,11 +38,48 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired()
             .HasDefaultValue(true);
 
+        // Configure audit fields from EntityAuditableBase
+        builder.Property(u => u.CreatedAt)
+            .IsRequired()
+            .HasColumnType("datetime2");
+
+        builder.Property(u => u.UpdatedAt)
+            .IsRequired(false)
+            .HasColumnType("datetime2");
+
+        builder.Property(u => u.CreatedBy)
+            .IsRequired(false)
+            .HasMaxLength(450);
+
+        builder.Property(u => u.UpdatedBy)
+            .IsRequired(false)
+            .HasMaxLength(450);
+
+        builder.Property(u => u.IsDeleted)
+            .IsRequired()
+            .HasDefaultValue(false);
+
+        builder.Property(u => u.DeletedAt)
+            .IsRequired(false)
+            .HasColumnType("datetime2");
+
+        builder.Property(u => u.DeletedBy)
+            .IsRequired(false)
+            .HasMaxLength(450);
+
         // Indexes
         builder.HasIndex(u => u.Email)
-            .IsUnique();
+            .IsUnique()
+            .HasDatabaseName("IX_Users_Email");
 
-        builder.HasIndex(u => u.PhoneNumber);
+        builder.HasIndex(u => u.PhoneNumber)
+            .HasDatabaseName("IX_Users_PhoneNumber");
+
+        builder.HasIndex(u => u.IsDeleted)
+            .HasDatabaseName("IX_Users_IsDeleted");
+
+        builder.HasIndex(u => u.CreatedAt)
+            .HasDatabaseName("IX_Users_CreatedAt");
 
         // Relationships
         builder.HasMany(u => u.UserRoles)
@@ -50,7 +87,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasForeignKey(ur => ur.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        // Query filter
-        builder.HasQueryFilter(u => u.IsActive);
+        // Query filter for soft delete
+        builder.HasQueryFilter(u => !u.IsDeleted);
     }
 } 
