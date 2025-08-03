@@ -7,28 +7,17 @@ using Healthy.Domain.Entities;
 
 namespace Healthy.Application.Users.Commands.Login;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
+public class LoginCommandHandler(
+    IApplicationDbContext context,
+    IJwtService jwtService,
+    ILogger<LoginCommandHandler> logger) : IRequestHandler<LoginCommand, AuthResult>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IJwtService _jwtService;
-    private readonly ILogger<LoginCommandHandler> _logger;
-
-    public LoginCommandHandler(
-        IApplicationDbContext context,
-        IJwtService jwtService,
-        ILogger<LoginCommandHandler> logger)
-    {
-        _context = context;
-        _jwtService = jwtService;
-        _logger = logger;
-    }
-
     public async Task<AuthResult> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         try
         {
             // Find user by email
-            var user = await _context.Users
+            var user = await context.Users
                 .Include(u => u.UserRoles)
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == request.Email && u.IsActive, cancellationToken);
@@ -43,7 +32,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
             }
 
             // Verify password (in real app, use proper password hashing)
-            if (!VerifyPassword(request.Password, user.PasswordHash))
+            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
             {
                 return new AuthResult
                 {
@@ -54,7 +43,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
 
             // Update last login
             user.LastLoginAt = DateTime.UtcNow;
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
 
             // Create user DTO
             var userDto = new UserDto
@@ -68,10 +57,10 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
             };
 
             // Generate JWT token
-            var token = _jwtService.GenerateToken(userDto);
-            var refreshToken = _jwtService.GenerateRefreshToken();
+            var token = jwtService.GenerateToken(userDto);
+            var refreshToken = jwtService.GenerateRefreshToken();
 
-            _logger.LogInformation("User {Email} logged in successfully", request.Email);
+            logger.LogInformation("User {Email} logged in successfully", request.Email);
 
             return new AuthResult
             {
@@ -84,19 +73,12 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResult>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred during login for user {Email}", request.Email);
+            logger.LogError(ex, "Error occurred during login for user {Email}", request.Email);
             return new AuthResult
             {
                 Succeeded = false,
                 Error = "An error occurred during login"
             };
         }
-    }
-
-    private bool VerifyPassword(string password, string passwordHash)
-    {
-        // In real application, use proper password hashing like BCrypt
-        // For now, using simple comparison (NOT for production)
-        return password == passwordHash;
     }
 } 

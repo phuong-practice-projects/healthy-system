@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Healthy.Application.Common.Interfaces;
 using Healthy.Application.Common.Models;
@@ -12,14 +13,23 @@ namespace Healthy.Infrastructure.Services;
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _jwtSettings;
+    private readonly ILogger<JwtService> _logger;
 
-    public JwtService(IOptions<JwtSettings> jwtSettings)
+    public JwtService(IOptions<JwtSettings> jwtSettings, ILogger<JwtService> logger)
     {
         _jwtSettings = jwtSettings.Value;
+        _logger = logger;
     }
 
     public string GenerateToken(UserDto user)
     {
+        _logger.LogInformation("Generating JWT token with settings:");
+        _logger.LogInformation("  SecretKey length: {Length}", _jwtSettings.SecretKey?.Length ?? 0);
+        _logger.LogInformation("  SecretKey preview: {Preview}...", _jwtSettings.SecretKey?.Substring(0, Math.Min(10, _jwtSettings.SecretKey?.Length ?? 0)));
+        _logger.LogInformation("  Issuer: {Issuer}", _jwtSettings.Issuer);
+        _logger.LogInformation("  Audience: {Audience}", _jwtSettings.Audience);
+        _logger.LogInformation("  ExpirationInMinutes: {Expiration}", _jwtSettings.ExpirationInMinutes);
+        
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
 

@@ -7,28 +7,17 @@ using Healthy.Domain.Entities;
 
 namespace Healthy.Application.Users.Commands.Register;
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResult>
+public class RegisterCommandHandler(
+    IApplicationDbContext context,
+    IJwtService jwtService,
+    ILogger<RegisterCommandHandler> logger) : IRequestHandler<RegisterCommand, AuthResult>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly IJwtService _jwtService;
-    private readonly ILogger<RegisterCommandHandler> _logger;
-
-    public RegisterCommandHandler(
-        IApplicationDbContext context,
-        IJwtService jwtService,
-        ILogger<RegisterCommandHandler> logger)
-    {
-        _context = context;
-        _jwtService = jwtService;
-        _logger = logger;
-    }
-
     public async Task<AuthResult> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         try
         {
             // Check if email already exists
-            var existingUser = await _context.Users
+            var existingUser = await context.Users
                 .FirstOrDefaultAsync(u => u.Email == request.Email, cancellationToken);
 
             if (existingUser != null)
@@ -41,7 +30,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
             }
 
             // Get default user role
-            var userRole = await _context.Roles
+            var userRole = await context.Roles
                 .FirstOrDefaultAsync(r => r.Name == "User" && r.IsActive, cancellationToken);
 
             if (userRole == null)
@@ -60,7 +49,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
                 FirstName = request.FirstName,
                 LastName = request.LastName,
                 Email = request.Email,
-                PasswordHash = HashPassword(request.Password), // In real app, use proper hashing
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password,12), // In real app, use proper hashing
                 PhoneNumber = request.PhoneNumber,
                 DateOfBirth = request.DateOfBirth,
                 Gender = request.Gender,
@@ -68,7 +57,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Users.Add(user);
+            context.Users.Add(user);
 
             // Assign default user role
             var userRoleEntity = new UserRole
@@ -79,9 +68,9 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.UserRoles.Add(userRoleEntity);
+            context.UserRoles.Add(userRoleEntity);
 
-            await _context.SaveChangesAsync(cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
 
             // Create user DTO
             var userDto = new UserDto
@@ -91,14 +80,14 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
                 LastName = user.LastName,
                 Email = user.Email,
                 FullName = user.FullName,
-                Roles = new List<string> { userRole.Name }
+                Roles = [userRole.Name]
             };
 
             // Generate JWT token
-            var token = _jwtService.GenerateToken(userDto);
-            var refreshToken = _jwtService.GenerateRefreshToken();
+            var token = jwtService.GenerateToken(userDto);
+            var refreshToken = jwtService.GenerateRefreshToken();
 
-            _logger.LogInformation("User {Email} registered successfully", request.Email);
+            logger.LogInformation("User {Email} registered successfully", request.Email);
 
             return new AuthResult
             {
@@ -111,19 +100,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResul
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error occurred during registration for user {Email}", request.Email);
+            logger.LogError(ex, "Error occurred during registration for user {Email}", request.Email);
             return new AuthResult
             {
                 Succeeded = false,
                 Error = "An error occurred during registration"
             };
         }
-    }
-
-    private string HashPassword(string password)
-    {
-        // In real application, use proper password hashing like BCrypt
-        // For now, using simple hash (NOT for production)
-        return password;
     }
 } 
