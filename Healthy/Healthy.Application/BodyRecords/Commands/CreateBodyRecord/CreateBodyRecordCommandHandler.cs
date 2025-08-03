@@ -35,7 +35,6 @@ public class CreateBodyRecordCommandHandler : IRequestHandler<CreateBodyRecordCo
                 RecordDate = request.RecordDate,
                 Notes = request.Notes,
                 CreatedAt = _dateTime.UtcNow,
-                IsDeleted = false
             };
 
             _context.BodyRecords.Add(bodyRecord);

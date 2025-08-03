@@ -59,10 +59,6 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired(false)
             .HasMaxLength(450);
 
-        builder.Property(c => c.IsDeleted)
-            .IsRequired()
-            .HasDefaultValue(false);
-
         builder.Property(c => c.DeletedAt)
             .IsRequired(false)
             .HasColumnType("datetime2");
@@ -72,8 +68,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .HasMaxLength(450);
 
         // Configure indexes
-        builder.HasIndex(c => c.IsDeleted)
-            .HasDatabaseName("IX_Categories_IsDeleted");
+        builder.HasIndex(c => c.DeletedAt)
+            .HasDatabaseName("IX_Categories_DeletedAt");
 
         builder.HasIndex(c => c.IsActive)
             .HasDatabaseName("IX_Categories_IsActive");
@@ -86,5 +82,8 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.HasIndex(c => c.CreatedAt)
             .HasDatabaseName("IX_Categories_CreatedAt");
+
+        // Global query filter for soft delete
+        builder.HasQueryFilter(c => c.DeletedAt == null);
     }
 }

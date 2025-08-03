@@ -19,14 +19,21 @@ public class DeleteMealCommandHandler : IRequestHandler<DeleteMealCommand, Resul
         try
         {
             var meal = await _context.Meals
-                .FirstOrDefaultAsync(m => m.Id == request.Id && m.UserId == request.UserId, cancellationToken);
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(m => m.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (meal == null)
             {
                 return Result<bool>.Failure("Meal not found or access denied.");
             }
 
-            _context.Meals.Remove(meal);
+            if (meal.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("Meal is already deleted");
+            }
+
+            // Soft delete the meal
+            meal.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
             return Result<bool>.Success(true);

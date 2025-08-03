@@ -11,15 +11,16 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Get connection string from environment variable
-        var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
-            ?? "Server=localhost;Database=HealthyDB;User Id=sa;Password=;TrustServerCertificate=true;";
+        // Get connection string from environment variables or configuration
+        var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") 
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Server=localhost,1433;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;";
         
         // Add Database Context
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(
                 connectionString,
-                b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)
+                b => b.MigrationsAssembly("Healthy.Infrastructure")
                       .EnableRetryOnFailure(
                           maxRetryCount: 3,
                           maxRetryDelay: TimeSpan.FromSeconds(30),
@@ -32,6 +33,7 @@ public static class DependencyInjection
         services.AddScoped<IDateTime, DateTimeService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<DatabaseSeeder>();
 
         return services;
     }

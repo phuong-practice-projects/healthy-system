@@ -104,7 +104,7 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t healthy-api:test ./Healthy/Healthy.Api
+        docker build -t healthy-api:test -f ./Healthy/Healthy.Api/Dockerfile ./Healthy
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master

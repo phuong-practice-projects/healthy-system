@@ -51,7 +51,8 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
-        context: ./Healthy/Healthy.Api
+        context: ./Healthy
+        file: ./Healthy/Healthy.Api/Dockerfile
         push: true
         tags: |
           ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}

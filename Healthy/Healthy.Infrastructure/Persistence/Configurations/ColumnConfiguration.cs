@@ -37,8 +37,9 @@ public class ColumnConfiguration : IEntityTypeConfiguration<Column>
         builder.HasIndex(c => c.Category);
         builder.HasIndex(c => c.CreatedAt);
         builder.HasIndex(c => c.IsPublished);
+        builder.HasIndex(c => c.DeletedAt);
 
         // Query filter for soft delete and published records
-        builder.HasQueryFilter(c => c.IsPublished && !c.IsDeleted);
+        builder.HasQueryFilter(c => c.IsPublished && c.DeletedAt == null);
     }
 }

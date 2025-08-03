@@ -32,5 +32,11 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
             .WithMany(r => r.UserRoles)
             .HasForeignKey(ur => ur.RoleId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        // Index for DeletedAt
+        builder.HasIndex(ur => ur.DeletedAt);
+
+        // Global query filter for soft delete
+        builder.HasQueryFilter(ur => ur.DeletedAt == null);
     }
 } 

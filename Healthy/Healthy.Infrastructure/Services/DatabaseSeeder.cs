@@ -97,7 +97,7 @@ public class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Admin@123", 12),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             },
             new User
             {
@@ -108,7 +108,7 @@ public class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("User@123", 12),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             },
             new User
             {
@@ -119,7 +119,7 @@ public class DatabaseSeeder
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("Moderator@123", 12),
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             }
         };
 
@@ -138,7 +138,7 @@ public class DatabaseSeeder
                 UserId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                 RoleId = Guid.Parse("11111111-1111-1111-1111-111111111111"),
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             },
             // Test user -> User role
             new UserRole
@@ -147,7 +147,7 @@ public class DatabaseSeeder
                 UserId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
                 RoleId = Guid.Parse("22222222-2222-2222-2222-222222222222"),
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             },
             // Moderator user -> Moderator role
             new UserRole
@@ -156,7 +156,7 @@ public class DatabaseSeeder
                 UserId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
                 RoleId = Guid.Parse("33333333-3333-3333-3333-333333333333"),
                 CreatedAt = DateTime.UtcNow,
-                IsDeleted = false
+                
             }
         };
 

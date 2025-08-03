@@ -17,7 +17,7 @@ public class GetBodyRecordGraphQueryHandler : IRequestHandler<GetBodyRecordGraph
     public async Task<BodyRecordGraphResponse> Handle(GetBodyRecordGraphQuery request, CancellationToken cancellationToken)
     {
         var query = _context.BodyRecords
-            .Where(br => br.UserId == request.UserId && !br.IsDeleted);
+            .Where(br => br.UserId.ToString().ToLower() == request.UserId.ToString().ToLower());
 
         if (request.StartDate.HasValue)
         {

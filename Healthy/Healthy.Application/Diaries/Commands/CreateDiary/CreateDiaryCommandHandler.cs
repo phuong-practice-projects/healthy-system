@@ -37,7 +37,6 @@ public class CreateDiaryCommandHandler : IRequestHandler<CreateDiaryCommand, Res
                 IsPrivate = request.IsPrivate,
                 DiaryDate = request.DiaryDate,
                 CreatedAt = _dateTime.UtcNow,
-                IsDeleted = false
             };
 
             _context.Diaries.Add(diary);

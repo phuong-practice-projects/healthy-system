@@ -49,7 +49,10 @@ public class ExerciseConfiguration : IEntityTypeConfiguration<Exercise>
             .HasForeignKey(e => e.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Index for DeletedAt
+        builder.HasIndex(e => e.DeletedAt);
+
         // Query filter
-        builder.HasQueryFilter(e => !e.IsDeleted);
+        builder.HasQueryFilter(e => e.DeletedAt == null);
     }
 }

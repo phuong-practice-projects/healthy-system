@@ -10,24 +10,15 @@ namespace Healthy.Application.Dashboard.Queries.GetDashboardSummary;
 /// Handler for getting dashboard summary statistics
 /// Advanced analytics for user engagement and progress tracking
 /// </summary>
-public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSummaryQuery, DashboardSummaryDto>
+public class GetDashboardSummaryQueryHandler(
+    IApplicationDbContext context,
+    ILogger<GetDashboardSummaryQueryHandler> logger) : IRequestHandler<GetDashboardSummaryQuery, DashboardSummaryDto>
 {
-    private readonly IApplicationDbContext _context;
-    private readonly ILogger<GetDashboardSummaryQueryHandler> _logger;
-
-    public GetDashboardSummaryQueryHandler(
-        IApplicationDbContext context,
-        ILogger<GetDashboardSummaryQueryHandler> logger)
-    {
-        _context = context;
-        _logger = logger;
-    }
-
     public async Task<DashboardSummaryDto> Handle(GetDashboardSummaryQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            _logger.LogInformation("Calculating dashboard summary for user {UserId}", request.UserId);
+            logger.LogInformation("Calculating dashboard summary for user {UserId}", request.UserId);
 
             var summary = new DashboardSummaryDto();
 
@@ -40,61 +31,68 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
             // Calculate total active days
             await CalculateActivityMetrics(request.UserId, summary, cancellationToken);
 
-            _logger.LogInformation("Dashboard summary calculated: {ActiveDays} active days, current streak: {Streak}", 
+            logger.LogInformation("Dashboard summary calculated: {ActiveDays} active days, current streak: {Streak}", 
                 summary.TotalActiveDays, summary.CurrentStreak);
 
             return summary;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error calculating dashboard summary for user {UserId}", request.UserId);
+            logger.LogError(ex, "Error calculating dashboard summary for user {UserId}", request.UserId);
             return new DashboardSummaryDto(); // Return empty summary on error
         }
     }
 
     private async Task CalculateStreakData(Guid userId, DashboardSummaryDto summary, CancellationToken cancellationToken)
     {
-        // Get all days where user had some activity (meals, exercises, diaries, or body records)
-        var activityDates = new HashSet<DateTime>();
+        string userIdStr = userId.ToString().ToLower();
 
-        // Meal activity dates
-        var mealDates = await _context.Meals
-            .Where(m => m.UserId == userId)
+        // Collect all activity dates in parallel
+        var mealDatesTask = context.Meals
+            .Where(m => m.UserId.ToString().ToLower() == userIdStr)
             .Select(m => m.Date.Date)
             .Distinct()
             .ToListAsync(cancellationToken);
-        activityDates.UnionWith(mealDates);
 
-        // Exercise activity dates
-        var exerciseDates = await _context.Exercises
-            .Where(e => e.UserId == userId && !e.IsDeleted)
+        var exerciseDatesTask = context.Exercises
+            .Where(e => e.UserId.ToString().ToLower() == userIdStr && e.DeletedAt == null)
             .Select(e => e.ExerciseDate.Date)
             .Distinct()
             .ToListAsync(cancellationToken);
-        activityDates.UnionWith(exerciseDates);
 
-        // Body record dates
-        var bodyRecordDates = await _context.BodyRecords
-            .Where(br => br.UserId == userId)
+        var bodyRecordDatesTask = context.BodyRecords
+            .Where(br => br.UserId.ToString().ToLower() == userIdStr)
             .Select(br => br.RecordDate.Date)
             .Distinct()
             .ToListAsync(cancellationToken);
-        activityDates.UnionWith(bodyRecordDates);
 
-        // Diary dates
-        var diaryDates = await _context.Diaries
-            .Where(d => d.UserId == userId)
+        var diaryDatesTask = context.Diaries
+            .Where(d => d.UserId.ToString().ToLower() == userIdStr)
             .Select(d => d.DiaryDate.Date)
             .Distinct()
             .ToListAsync(cancellationToken);
-        activityDates.UnionWith(diaryDates);
+
+        await Task.WhenAll(mealDatesTask, exerciseDatesTask, bodyRecordDatesTask, diaryDatesTask);
+
+        var activityDates = new HashSet<DateTime>();
+        activityDates.UnionWith(mealDatesTask.Result);
+        activityDates.UnionWith(exerciseDatesTask.Result);
+        activityDates.UnionWith(bodyRecordDatesTask.Result);
+        activityDates.UnionWith(diaryDatesTask.Result);
+
+        if (activityDates.Count == 0)
+        {
+            summary.CurrentStreak = 0;
+            summary.BestStreak = 0;
+            return;
+        }
 
         // Calculate current streak (consecutive days from today backwards)
-        var sortedDates = activityDates.OrderByDescending(d => d).ToList();
-        var currentStreak = 0;
-        var checkDate = DateTime.Today;
+        var sortedDatesDesc = activityDates.OrderByDescending(d => d).ToList();
+        int currentStreak = 0;
+        DateTime checkDate = DateTime.Today;
 
-        foreach (var date in sortedDates)
+        foreach (var date in sortedDatesDesc)
         {
             if (date == checkDate)
             {
@@ -108,7 +106,20 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
         }
 
         // Calculate best streak (longest consecutive sequence)
-        var bestStreak = CalculateLongestStreak(activityDates.OrderBy(d => d).ToList());
+        var sortedDatesAsc = activityDates.OrderBy(d => d).ToList();
+        int bestStreak = 1, streak = 1;
+        for (int i = 1; i < sortedDatesAsc.Count; i++)
+        {
+            if (sortedDatesAsc[i] == sortedDatesAsc[i - 1].AddDays(1))
+            {
+                streak++;
+                if (streak > bestStreak) bestStreak = streak;
+            }
+            else
+            {
+                streak = 1;
+            }
+        }
 
         summary.CurrentStreak = currentStreak;
         summary.BestStreak = bestStreak;
@@ -116,7 +127,7 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
     private static int CalculateLongestStreak(List<DateTime> sortedDates)
     {
-        if (!sortedDates.Any()) return 0;
+        if (sortedDates.Count == 0) return 0;
 
         var bestStreak = 1;
         var currentStreak = 1;
@@ -140,9 +151,11 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
     private async Task CalculateWeightMetrics(Guid userId, DashboardSummaryDto summary, CancellationToken cancellationToken)
     {
+
+        string userIdStr = userId.ToString().ToLower();
         // Get most recent weight record
-        var latestWeight = await _context.BodyRecords
-            .Where(br => br.UserId == userId)
+        var latestWeight = await context.BodyRecords
+            .Where(br => br.UserId.ToString().ToLower() == userIdStr)
             .OrderByDescending(br => br.RecordDate)
             .Select(br => (decimal?)br.Weight)
             .FirstOrDefaultAsync(cancellationToken);
@@ -151,8 +164,8 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
         // Calculate weight change from last month
         var oneMonthAgo = DateTime.Today.AddMonths(-1);
-        var weightLastMonth = await _context.BodyRecords
-            .Where(br => br.UserId == userId && br.RecordDate.Date <= oneMonthAgo)
+        var weightLastMonth = await context.BodyRecords
+            .Where(br => br.UserId.ToString().ToLower() == userIdStr  && br.RecordDate.Date <= oneMonthAgo)
             .OrderByDescending(br => br.RecordDate)
             .Select(br => (decimal?)br.Weight)
             .FirstOrDefaultAsync(cancellationToken);
@@ -165,36 +178,36 @@ public class GetDashboardSummaryQueryHandler : IRequestHandler<GetDashboardSumma
 
     private async Task CalculateActivityMetrics(Guid userId, DashboardSummaryDto summary, CancellationToken cancellationToken)
     {
+        string userIdStr = userId.ToString().ToLower();
         // Get user's first activity date to calculate total active period
-        var firstActivityDate = DateTime.MaxValue;
+        var firstActivityDates = await Task.WhenAll(
+            context.Meals
+                .Where(m => m.UserId.ToString().ToLower() == userIdStr)
+                .OrderBy(m => m.CreatedAt)
+                .Select(m => (DateTime?)m.CreatedAt.Date)
+                .FirstOrDefaultAsync(cancellationToken),
+            context.Exercises
+                .Where(e => e.UserId.ToString().ToLower() == userIdStr && e.DeletedAt == null)
+                .OrderBy(e => e.CreatedAt)
+                .Select(e => (DateTime?)e.CreatedAt.Date)
+                .FirstOrDefaultAsync(cancellationToken),
+            context.BodyRecords
+                .Where(br => br.UserId.ToString().ToLower() == userIdStr)
+                .OrderBy(br => br.CreatedAt)
+                .Select(br => (DateTime?)br.CreatedAt.Date)
+                .FirstOrDefaultAsync(cancellationToken),
+            context.Diaries
+                .Where(d => d.UserId.ToString().ToLower() == userIdStr)
+                .OrderBy(d => d.CreatedAt)
+                .Select(d => (DateTime?)d.CreatedAt.Date)
+                .FirstOrDefaultAsync(cancellationToken)
+        );
 
-        var firstMeal = await _context.Meals
-            .Where(m => m.UserId == userId)
-            .OrderBy(m => m.CreatedAt)
-            .Select(m => m.CreatedAt.Date)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (firstMeal != default) firstActivityDate = Min(firstActivityDate, firstMeal);
-
-        var firstExercise = await _context.Exercises
-            .Where(e => e.UserId == userId && !e.IsDeleted)
-            .OrderBy(e => e.CreatedAt)
-            .Select(e => e.CreatedAt.Date)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (firstExercise != default) firstActivityDate = Min(firstActivityDate, firstExercise);
-
-        var firstBodyRecord = await _context.BodyRecords
-            .Where(br => br.UserId == userId)
-            .OrderBy(br => br.CreatedAt)
-            .Select(br => br.CreatedAt.Date)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (firstBodyRecord != default) firstActivityDate = Min(firstActivityDate, firstBodyRecord);
-
-        var firstDiary = await _context.Diaries
-            .Where(d => d.UserId == userId)
-            .OrderBy(d => d.CreatedAt)
-            .Select(d => d.CreatedAt.Date)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (firstDiary != default) firstActivityDate = Min(firstActivityDate, firstDiary);
+        var firstActivityDate = firstActivityDates
+            .Where(d => d.HasValue)
+            .Select(d => d.Value)
+            .DefaultIfEmpty(DateTime.MaxValue)
+            .Min();
 
         if (firstActivityDate != DateTime.MaxValue)
         {

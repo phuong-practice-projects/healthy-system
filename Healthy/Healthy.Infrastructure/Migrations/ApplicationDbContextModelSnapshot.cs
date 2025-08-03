@@ -44,9 +44,6 @@ namespace Healthy.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -69,6 +66,8 @@ namespace Healthy.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeletedAt");
+
                     b.HasIndex("RecordDate");
 
                     b.HasIndex("UserId");
@@ -84,7 +83,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 18.5m,
                             CreatedAt = new DateTime(2024, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "健康診断後の記録",
                             RecordDate = new DateTime(2024, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -96,7 +94,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 18.2m,
                             CreatedAt = new DateTime(2024, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "ダイエット開始",
                             RecordDate = new DateTime(2024, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -108,7 +105,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 17.9m,
                             CreatedAt = new DateTime(2024, 7, 14, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "順調に減量中",
                             RecordDate = new DateTime(2024, 7, 14, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -120,7 +116,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 17.6m,
                             CreatedAt = new DateTime(2024, 7, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "運動効果が見えてきた",
                             RecordDate = new DateTime(2024, 7, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -132,7 +127,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 17.3m,
                             CreatedAt = new DateTime(2024, 7, 24, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "目標体重に近づいている",
                             RecordDate = new DateTime(2024, 7, 24, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -144,7 +138,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 17.0m,
                             CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "理想的な体重に到達",
                             RecordDate = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -156,7 +149,6 @@ namespace Healthy.Infrastructure.Migrations
                             BodyFatPercentage = 16.8m,
                             CreatedAt = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
-                            IsDeleted = false,
                             Notes = "維持していきたい",
                             RecordDate = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
@@ -203,11 +195,6 @@ namespace Healthy.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
                     b.Property<DateTime>("PublishedAt")
                         .HasColumnType("datetime2");
 
@@ -231,11 +218,11 @@ namespace Healthy.Infrastructure.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_Categories_CreatedAt");
 
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("IX_Categories_DeletedAt");
+
                     b.HasIndex("IsActive")
                         .HasDatabaseName("IX_Categories_IsActive");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_Categories_IsDeleted");
 
                     b.HasIndex("PublishedAt")
                         .HasDatabaseName("IX_Categories_PublishedAt");
@@ -252,7 +239,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "健康的な食事とダイエットに関する情報とヒント",
                             ImageUrl = "/images/categories/diet-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#食事,#ダイエット,#栄養"
                         },
@@ -265,7 +251,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "効果的な運動方法とフィットネスガイド",
                             ImageUrl = "/images/categories/exercise-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#運動,#フィットネス,#トレーニング"
                         },
@@ -278,7 +263,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "美容とスキンケアに関する専門的なアドバイス",
                             ImageUrl = "/images/categories/beauty-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 14, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#美容,#スキンケア,#アンチエイジング"
                         },
@@ -291,7 +275,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "心と体の健康を保つためのウェルネス情報",
                             ImageUrl = "/images/categories/wellness-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#ウェルネス,#健康,#心理"
                         },
@@ -304,7 +287,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "専門家が推奨する健康に関する総合的な情報",
                             ImageUrl = "/images/categories/recommended-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 24, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#推奨,#専門家,#総合"
                         },
@@ -317,7 +299,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "健康的なライフスタイルを送るためのヒント",
                             ImageUrl = "/images/categories/lifestyle-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 6, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#ライフスタイル,#習慣,#日常"
                         },
@@ -330,7 +311,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "健康的で美味しいレシピとクッキングガイド",
                             ImageUrl = "/images/categories/recipe-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#レシピ,#料理,#ヘルシー"
                         },
@@ -343,7 +323,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "栄養補助食品とサプリメントに関する情報",
                             ImageUrl = "/images/categories/supplement-category.jpg",
                             IsActive = true,
-                            IsDeleted = false,
                             PublishedAt = new DateTime(2024, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             Tags = "#サプリメント,#栄養補助,#健康食品"
                         });
@@ -380,9 +359,6 @@ namespace Healthy.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsPublished")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -409,6 +385,8 @@ namespace Healthy.Infrastructure.Migrations
 
                     b.HasIndex("CreatedAt");
 
+                    b.HasIndex("DeletedAt");
+
                     b.HasIndex("IsPublished");
 
                     b.ToTable("Columns", (string)null);
@@ -422,7 +400,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
                             ImageUrl = "/images/column-01.jpg",
-                            IsDeleted = false,
                             IsPublished = true,
                             Tags = "#魚料理,#和食,#DHA",
                             Title = "魚を食べて頭もカラダも元気に！"
@@ -435,7 +412,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
                             ImageUrl = "/images/column-02.jpg",
-                            IsDeleted = false,
                             IsPublished = true,
                             Tags = "#ダイエット,#ヘルシー,#レシピ",
                             Title = "ダイエットレシピ特集"
@@ -448,7 +424,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
                             ImageUrl = "/images/column-03.jpg",
-                            IsDeleted = false,
                             IsPublished = true,
                             Tags = "#美容,#アンチエイジング,#スキンケア",
                             Title = "美肌効果抜群！アンチエイジング"
@@ -461,7 +436,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
                             ImageUrl = "/images/column-04.jpg",
-                            IsDeleted = false,
                             IsPublished = true,
                             Tags = "#運動,#健康,#初心者",
                             Title = "運動習慣を身につけよう"
@@ -474,7 +448,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
                             ImageUrl = "/images/column-05.jpg",
-                            IsDeleted = false,
                             IsPublished = true,
                             Tags = "#栄養,#免疫力,#バランス",
                             Title = "バランスの良い食事で免疫力アップ"
@@ -506,9 +479,6 @@ namespace Healthy.Infrastructure.Migrations
                     b.Property<DateTime>("DiaryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsPrivate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
@@ -538,6 +508,8 @@ namespace Healthy.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeletedAt");
+
                     b.HasIndex("DiaryDate");
 
                     b.HasIndex("IsPrivate");
@@ -556,7 +528,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 4, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "やる気満々",
                             Tags = "#ダイエット,#決意,#目標設定",
@@ -570,7 +541,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 9, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "充実感",
                             Tags = "#ランニング,#運動,#達成感",
@@ -584,7 +554,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 14, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 14, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = true,
                             Mood = "前向き",
                             Tags = "#食事管理,#カロリー,#野菜",
@@ -598,7 +567,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 19, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 19, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "ワクワク",
                             Tags = "#筋トレ,#ジム,#トレーナー",
@@ -612,7 +580,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 24, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 24, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "嬉しい",
                             Tags = "#体重減少,#モチベーション,#成果",
@@ -626,7 +593,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = true,
                             Mood = "穏やか",
                             Tags = "#ヨガ,#柔軟性,#リラックス",
@@ -640,7 +606,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "楽しい",
                             Tags = "#友人,#励まし,#チームワーク",
@@ -654,7 +619,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedAt = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             DiaryDate = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             IsPrivate = false,
                             Mood = "満足",
                             Tags = "#継続,#目標,#成長",
@@ -698,9 +662,6 @@ namespace Healthy.Infrastructure.Migrations
                     b.Property<DateTime>("ExerciseDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -723,6 +684,8 @@ namespace Healthy.Infrastructure.Migrations
 
                     b.HasIndex("Category");
 
+                    b.HasIndex("DeletedAt");
+
                     b.HasIndex("ExerciseDate");
 
                     b.HasIndex("UserId");
@@ -742,7 +705,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "公園で30分のジョギング",
                             DurationMinutes = 30,
                             ExerciseDate = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "天気が良くて気持ちよかった",
                             Title = "朝のランニング",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -757,7 +719,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "ジムでの筋トレセッション",
                             DurationMinutes = 45,
                             ExerciseDate = new DateTime(2024, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "腕と胸を重点的に",
                             Title = "筋力トレーニング",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -772,7 +733,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "ハタヨガ60分クラス",
                             DurationMinutes = 60,
                             ExerciseDate = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "リラックスできた",
                             Title = "ヨガクラス",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -787,7 +747,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "プールで自由形25m×20本",
                             DurationMinutes = 40,
                             ExerciseDate = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "久しぶりの水泳で疲れた",
                             Title = "水泳",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -802,7 +761,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "川沿いを1時間サイクリング",
                             DurationMinutes = 60,
                             ExerciseDate = new DateTime(2024, 7, 31, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "景色を楽しみながら",
                             Title = "サイクリング",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -817,7 +775,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "ズンバクラス",
                             DurationMinutes = 50,
                             ExerciseDate = new DateTime(2024, 8, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "楽しく汗をかけた",
                             Title = "ダンスレッスン",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -832,7 +789,6 @@ namespace Healthy.Infrastructure.Migrations
                             Description = "近所を軽く散歩",
                             DurationMinutes = 25,
                             ExerciseDate = new DateTime(2024, 8, 2, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDeleted = false,
                             Notes = "リフレッシュできた",
                             Title = "散歩",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
@@ -867,9 +823,6 @@ namespace Healthy.Infrastructure.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -885,6 +838,9 @@ namespace Healthy.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("IX_Meals_DeletedAt");
 
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_Meals_UserId");
@@ -905,7 +861,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/breakfast-01.jpg",
-                            IsDeleted = false,
                             Type = "Morning",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -916,7 +871,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/lunch-01.jpg",
-                            IsDeleted = false,
                             Type = "Lunch",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -927,7 +881,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 27, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/dinner-01.jpg",
-                            IsDeleted = false,
                             Type = "Dinner",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -938,7 +891,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/breakfast-02.jpg",
-                            IsDeleted = false,
                             Type = "Morning",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -949,7 +901,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 28, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/lunch-02.jpg",
-                            IsDeleted = false,
                             Type = "Lunch",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -960,7 +911,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/snack-01.jpg",
-                            IsDeleted = false,
                             Type = "Snack",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -971,7 +921,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 29, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/dinner-02.jpg",
-                            IsDeleted = false,
                             Type = "Dinner",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -982,7 +931,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 30, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/breakfast-03.jpg",
-                            IsDeleted = false,
                             Type = "Morning",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         },
@@ -993,7 +941,6 @@ namespace Healthy.Infrastructure.Migrations
                             CreatedBy = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb",
                             Date = new DateTime(2024, 7, 31, 0, 0, 0, 0, DateTimeKind.Utc),
                             ImageUrl = "/images/meals/lunch-03.jpg",
-                            IsDeleted = false,
                             Type = "Lunch",
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         });
@@ -1093,11 +1040,6 @@ namespace Healthy.Infrastructure.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("datetime2");
 
@@ -1127,12 +1069,12 @@ namespace Healthy.Infrastructure.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_Users_CreatedAt");
 
+                    b.HasIndex("DeletedAt")
+                        .HasDatabaseName("IX_Users_DeletedAt");
+
                     b.HasIndex("Email")
                         .IsUnique()
                         .HasDatabaseName("IX_Users_Email");
-
-                    b.HasIndex("IsDeleted")
-                        .HasDatabaseName("IX_Users_IsDeleted");
 
                     b.HasIndex("PhoneNumber")
                         .HasDatabaseName("IX_Users_PhoneNumber");
@@ -1148,7 +1090,6 @@ namespace Healthy.Infrastructure.Migrations
                             Email = "admin@healthysystem.com",
                             FirstName = "System",
                             IsActive = true,
-                            IsDeleted = false,
                             LastName = "Administrator",
                             PasswordHash = "$2a$11$3tEK5ZODo.jJF5nJv.wgbeOaE4j3RgD8xTg2Pl3.wIzBzJo7MKf6W"
                         },
@@ -1160,7 +1101,6 @@ namespace Healthy.Infrastructure.Migrations
                             Email = "user@healthysystem.com",
                             FirstName = "Test",
                             IsActive = true,
-                            IsDeleted = false,
                             LastName = "User",
                             PasswordHash = "$2a$11$3tEK5ZODo.jJF5nJv.wgbeOaE4j3RgD8xTg2Pl3.wIzBzJo7MKf6W"
                         });
@@ -1184,9 +1124,6 @@ namespace Healthy.Infrastructure.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1201,6 +1138,8 @@ namespace Healthy.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("DeletedAt");
+
                     b.HasIndex("RoleId");
 
                     b.HasIndex("UserId", "RoleId")
@@ -1214,7 +1153,6 @@ namespace Healthy.Infrastructure.Migrations
                             Id = new Guid("11111111-aaaa-aaaa-aaaa-111111111111"),
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
-                            IsDeleted = false,
                             RoleId = new Guid("11111111-1111-1111-1111-111111111111"),
                             UserId = new Guid("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
                         },
@@ -1223,7 +1161,6 @@ namespace Healthy.Infrastructure.Migrations
                             Id = new Guid("22222222-bbbb-bbbb-bbbb-222222222222"),
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             CreatedBy = "system",
-                            IsDeleted = false,
                             RoleId = new Guid("22222222-2222-2222-2222-222222222222"),
                             UserId = new Guid("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb")
                         });

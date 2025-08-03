@@ -24,17 +24,24 @@ public class DeleteDiaryCommandHandler : IRequestHandler<DeleteDiaryCommand, Res
         try
         {
             var diary = await _context.Diaries
-                .FirstOrDefaultAsync(d => d.Id == request.Id && d.UserId == request.UserId, cancellationToken);
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(d => d.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (diary == null)
             {
                 return Result<bool>.Failure("Diary not found or you don't have permission to delete it");
             }
 
-            _context.Diaries.Remove(diary);
+            if (diary.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("Diary is already deleted");
+            }
+
+            // Soft delete the diary
+            diary.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Diary {Id} deleted successfully for user {UserId}", request.Id, request.UserId);
+            _logger.LogInformation("Diary {Id} soft deleted successfully for user {UserId}", request.Id, request.UserId);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

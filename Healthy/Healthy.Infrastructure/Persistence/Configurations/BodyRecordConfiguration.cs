@@ -39,7 +39,10 @@ public class BodyRecordConfiguration : IEntityTypeConfiguration<BodyRecord>
             .HasForeignKey(br => br.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Index for DeletedAt
+        builder.HasIndex(br => br.DeletedAt);
+
         // Query filter
-        builder.HasQueryFilter(br => !br.IsDeleted);
+        builder.HasQueryFilter(br => br.DeletedAt == null);
     }
 }

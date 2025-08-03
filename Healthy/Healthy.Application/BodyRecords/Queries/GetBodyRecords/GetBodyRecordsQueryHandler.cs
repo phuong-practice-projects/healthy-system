@@ -1,9 +1,10 @@
+using Healthy.Application.BodyRecords.Queries.GetBodyRecord;
+using Healthy.Application.Common.Helpers;
+using Healthy.Application.Common.Interfaces;
+using Healthy.Application.Common.Models;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Healthy.Application.Common.Interfaces;
-using Healthy.Application.Common.Models;
-using Healthy.Application.BodyRecords.Queries.GetBodyRecord;
 
 namespace Healthy.Application.BodyRecords.Queries.GetBodyRecords;
 
@@ -25,7 +26,7 @@ public class GetBodyRecordsQueryHandler : IRequestHandler<GetBodyRecordsQuery, B
         try
         {
             var query = _context.BodyRecords
-                .Where(br => br.UserId == request.UserId);
+                .Where(br => br.UserId.ToString().ToLower() == request.UserId.ToString().ToLower());
 
             if (request.StartDate.HasValue)
             {

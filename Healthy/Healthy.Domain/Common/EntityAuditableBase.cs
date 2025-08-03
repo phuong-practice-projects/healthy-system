@@ -26,11 +26,6 @@ public abstract class EntityAuditableBase : EntityBase, IEntityAuditableBase
     public string? UpdatedBy { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the entity is soft deleted
-    /// </summary>
-    public bool IsDeleted { get; set; }
-
-    /// <summary>
     /// Gets or sets the date and time when the entity was soft deleted
     /// </summary>
     public DateTime? DeletedAt { get; set; }
@@ -41,12 +36,16 @@ public abstract class EntityAuditableBase : EntityBase, IEntityAuditableBase
     public string? DeletedBy { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the entity is soft deleted
+    /// </summary>
+    public bool IsDeleted => DeletedAt.HasValue;
+
+    /// <summary>
     /// Initializes a new instance of the EntityAuditableBase class
     /// </summary>
     protected EntityAuditableBase() : base()
     {
         CreatedAt = DateTime.UtcNow;
-        IsDeleted = false;
     }
 
     /// <summary>
@@ -56,7 +55,6 @@ public abstract class EntityAuditableBase : EntityBase, IEntityAuditableBase
     protected EntityAuditableBase(Guid id) : base(id)
     {
         CreatedAt = DateTime.UtcNow;
-        IsDeleted = false;
     }
 
     /// <summary>
@@ -65,7 +63,6 @@ public abstract class EntityAuditableBase : EntityBase, IEntityAuditableBase
     /// <param name="deletedBy">The identifier of the user who is deleting the entity</param>
     public virtual void Delete(string? deletedBy = null)
     {
-        IsDeleted = true;
         DeletedAt = DateTime.UtcNow;
         DeletedBy = deletedBy;
     }
@@ -75,7 +72,6 @@ public abstract class EntityAuditableBase : EntityBase, IEntityAuditableBase
     /// </summary>
     public virtual void Restore()
     {
-        IsDeleted = false;
         DeletedAt = null;
         DeletedBy = null;
     }

@@ -24,7 +24,7 @@ public class GetExerciseQueryHandler : IRequestHandler<GetExerciseQuery, Result<
         try
         {
             var exercise = await _context.Exercises
-                .FirstOrDefaultAsync(e => e.Id == request.Id && e.UserId == request.UserId, cancellationToken);
+                .FirstOrDefaultAsync(e => e.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (exercise == null)
             {

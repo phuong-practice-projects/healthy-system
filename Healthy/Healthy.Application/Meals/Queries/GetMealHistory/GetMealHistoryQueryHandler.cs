@@ -31,7 +31,7 @@ public class GetMealHistoryQueryHandler : IRequestHandler<GetMealHistoryQuery, M
             request.UserId, targetDate, request.Type ?? "None");
 
         var query = _context.Meals
-            .Where(m => m.UserId == request.UserId && m.Date.Date == targetDate);
+            .Where(m => m.UserId.ToString().ToLower() == request.UserId.ToString().ToLower() && m.Date.Date == targetDate);
 
         // Apply type filter if specified (for dashboard filter buttons)
         if (!string.IsNullOrEmpty(request.Type))

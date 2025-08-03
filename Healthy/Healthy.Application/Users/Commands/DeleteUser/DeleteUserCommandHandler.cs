@@ -24,18 +24,24 @@ public class DeleteUserCommandHandler : IRequestHandler<DeleteUserCommand, Resul
         try
         {
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Id == request.Id, cancellationToken);
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (user == null)
             {
                 return Result<bool>.Failure("User not found");
             }
 
-            // Note: In a real application, you might want to soft delete or handle related data
-            _context.Users.Remove(user);
+            if (user.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("User is already deleted");
+            }
+
+            // Soft delete the user
+            user.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("User {Id} deleted successfully", request.Id);
+            _logger.LogInformation("User {Id} soft deleted successfully", request.Id);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

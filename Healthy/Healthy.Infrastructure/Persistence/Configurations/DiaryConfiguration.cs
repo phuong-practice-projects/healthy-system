@@ -47,7 +47,10 @@ public class DiaryConfiguration : IEntityTypeConfiguration<Diary>
             .HasForeignKey(d => d.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        // Index for DeletedAt
+        builder.HasIndex(d => d.DeletedAt);
+
         // Query filter
-        builder.HasQueryFilter(d => !d.IsDeleted);
+        builder.HasQueryFilter(d => d.DeletedAt == null);
     }
 }

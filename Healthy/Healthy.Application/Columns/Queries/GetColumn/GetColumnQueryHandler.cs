@@ -24,7 +24,7 @@ public class GetColumnQueryHandler : IRequestHandler<GetColumnQuery, Result<Colu
         try
         {
             var column = await _context.Columns
-                .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
+                .FirstOrDefaultAsync(c => c.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (column == null)
             {

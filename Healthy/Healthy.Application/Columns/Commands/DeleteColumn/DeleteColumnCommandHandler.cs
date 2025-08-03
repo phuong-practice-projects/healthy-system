@@ -23,18 +23,23 @@ public class DeleteColumnCommandHandler : IRequestHandler<DeleteColumnCommand, R
     {
         try
         {
-            var column = await _context.Columns
-                .FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
+            var column = await _context.Columns.FirstOrDefaultAsync(c => c.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (column == null)
             {
                 return Result<bool>.Failure("Column not found");
             }
 
-            _context.Columns.Remove(column);
+            if (column.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("Column is already deleted");
+            }
+
+            // Soft delete the column
+            column.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Column {Id} deleted successfully", request.Id);
+            _logger.LogInformation("Column {Id} soft deleted successfully", request.Id);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

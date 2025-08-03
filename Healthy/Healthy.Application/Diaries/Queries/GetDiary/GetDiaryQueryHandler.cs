@@ -24,7 +24,7 @@ public class GetDiaryQueryHandler : IRequestHandler<GetDiaryQuery, Result<DiaryD
         try
         {
             var diary = await _context.Diaries
-                .FirstOrDefaultAsync(d => d.Id == request.Id && d.UserId == request.UserId, cancellationToken);
+                .FirstOrDefaultAsync(d => d.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (diary == null)
             {

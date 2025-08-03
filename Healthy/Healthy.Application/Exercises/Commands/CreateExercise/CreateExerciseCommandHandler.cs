@@ -38,7 +38,6 @@ public class CreateExerciseCommandHandler : IRequestHandler<CreateExerciseComman
                 Category = request.Category,
                 Notes = request.Notes,
                 CreatedAt = _dateTime.UtcNow,
-                IsDeleted = false
             };
 
             _context.Exercises.Add(exercise);

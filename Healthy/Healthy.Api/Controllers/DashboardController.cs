@@ -16,7 +16,7 @@ namespace Healthy.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/dashboard")]
-[Authorize]
+// [Authorize]
 [SwaggerTag("Enterprise-grade dashboard with both micro-APIs and aggregated endpoints for optimal performance")]
 public class DashboardController(IMediator mediator) : BaseController
 {

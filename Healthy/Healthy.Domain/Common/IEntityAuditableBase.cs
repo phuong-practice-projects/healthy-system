@@ -26,11 +26,6 @@ public interface IEntityAuditableBase
     string? UpdatedBy { get; set; }
 
     /// <summary>
-    /// Gets or sets a value indicating whether the entity is soft deleted
-    /// </summary>
-    bool IsDeleted { get; set; }
-
-    /// <summary>
     /// Gets or sets the date and time when the entity was soft deleted
     /// </summary>
     DateTime? DeletedAt { get; set; }

@@ -12,7 +12,7 @@ namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+// [Authorize]
 [SwaggerTag("Meal management endpoints for CRUD operations")]
 public class MealsController(IMediator mediator) : BaseController
 {

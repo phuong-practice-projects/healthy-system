@@ -93,7 +93,7 @@ public class GetDashboardAchievementQueryHandler : IRequestHandler<GetDashboardA
         var idealMealTypes = new[] { "Morning", "Lunch", "Dinner" };
         
         var mealsToday = await _context.Meals
-            .Where(m => m.UserId == userId && m.Date.Date == targetDate)
+            .Where(m => m.UserId.ToString().ToLower() == userId.ToString().ToLower() && m.Date.Date == targetDate)
             .Select(m => m.Type)
             .ToListAsync(cancellationToken);
 
@@ -112,7 +112,7 @@ public class GetDashboardAchievementQueryHandler : IRequestHandler<GetDashboardA
     {
         // Goal: At least 1 exercise session per day
         var exerciseCount = await _context.Exercises
-            .Where(e => e.UserId == userId && e.ExerciseDate.Date == targetDate && !e.IsDeleted)
+            .Where(e => e.UserId.ToString().ToLower() == userId.ToString().ToLower() && e.ExerciseDate.Date == targetDate)
             .CountAsync(cancellationToken);
 
         var completed = Math.Min(exerciseCount, 1); // Cap at 1 for daily goal
@@ -130,7 +130,7 @@ public class GetDashboardAchievementQueryHandler : IRequestHandler<GetDashboardA
     {
         // Goal: Record body metrics at least once per day
         var bodyRecordCount = await _context.BodyRecords
-            .Where(br => br.UserId == userId && br.RecordDate.Date == targetDate)
+            .Where(br => br.UserId.ToString().ToLower() == userId.ToString().ToLower() && br.RecordDate.Date == targetDate)
             .CountAsync(cancellationToken);
 
         var completed = Math.Min(bodyRecordCount, 1); // Cap at 1 for daily goal
@@ -148,7 +148,7 @@ public class GetDashboardAchievementQueryHandler : IRequestHandler<GetDashboardA
     {
         // Goal: Write at least 1 diary entry per day for reflection
         var diaryCount = await _context.Diaries
-            .Where(d => d.UserId == userId && d.DiaryDate.Date == targetDate)
+            .Where(d => d.UserId.ToString().ToLower() == userId.ToString().ToLower() && d.DiaryDate.Date == targetDate)
             .CountAsync(cancellationToken);
 
         var completed = Math.Min(diaryCount, 1); // Cap at 1 for daily goal

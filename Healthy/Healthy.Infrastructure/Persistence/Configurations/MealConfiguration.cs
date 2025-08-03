@@ -57,5 +57,11 @@ public class MealConfiguration : IEntityTypeConfiguration<Meal>
 
         builder.HasIndex(m => new { m.UserId, m.Type })
             .HasDatabaseName("IX_Meals_UserId_Type");
+
+        builder.HasIndex(m => m.DeletedAt)
+            .HasDatabaseName("IX_Meals_DeletedAt");
+
+        // Global query filter for soft delete
+        builder.HasQueryFilter(m => m.DeletedAt == null);
     }
 }

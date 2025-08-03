@@ -24,7 +24,7 @@ public class GetBodyRecordQueryHandler : IRequestHandler<GetBodyRecordQuery, Res
         try
         {
             var bodyRecord = await _context.BodyRecords
-                .FirstOrDefaultAsync(br => br.Id == request.Id && br.UserId == request.UserId, cancellationToken);
+                .FirstOrDefaultAsync(br => br.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (bodyRecord == null)
             {

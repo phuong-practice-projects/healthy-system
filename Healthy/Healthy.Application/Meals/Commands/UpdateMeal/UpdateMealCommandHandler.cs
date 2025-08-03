@@ -19,7 +19,7 @@ public class UpdateMealCommandHandler : IRequestHandler<UpdateMealCommand, Resul
         try
         {
             var meal = await _context.Meals
-                .FirstOrDefaultAsync(m => m.Id == request.Id && m.UserId == request.UserId, cancellationToken);
+                .FirstOrDefaultAsync(m => m.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (meal == null)
             {

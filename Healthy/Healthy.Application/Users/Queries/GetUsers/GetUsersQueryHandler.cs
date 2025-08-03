@@ -26,8 +26,14 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserDto>
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
-                FullName = u.FullName,
-                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                FullName = $"{u.FirstName} {u.LastName}",
+                PhoneNumber = u.PhoneNumber,
+                DateOfBirth = u.DateOfBirth,
+                Gender = u.Gender,
+                IsActive = u.IsActive,
+                Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList(),
+                CreatedAt = u.CreatedAt,
+                UpdatedAt = u.UpdatedAt
             })
             .ToListAsync(cancellationToken);
 

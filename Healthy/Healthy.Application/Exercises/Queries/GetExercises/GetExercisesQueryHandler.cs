@@ -17,7 +17,7 @@ public class GetExercisesQueryHandler : IRequestHandler<GetExercisesQuery, Exerc
     public async Task<ExerciseListResponse> Handle(GetExercisesQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Exercises
-            .Where(e => e.UserId == request.UserId && !e.IsDeleted);
+            .Where(e => e.UserId.ToString().ToLower() == request.UserId.ToString().ToLower());
 
         if (request.StartDate.HasValue)
         {

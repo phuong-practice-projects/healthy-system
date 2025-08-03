@@ -17,7 +17,8 @@ public class GetDiariesQueryHandler : IRequestHandler<GetDiariesQuery, DiaryList
     public async Task<DiaryListResponse> Handle(GetDiariesQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Diaries
-            .Where(d => d.UserId == request.UserId && !d.IsDeleted);
+            .AsNoTracking()
+            .Where(d => d.UserId.ToString().ToLower() == request.UserId.ToString().ToLower());
 
         if (request.StartDate.HasValue)
         {

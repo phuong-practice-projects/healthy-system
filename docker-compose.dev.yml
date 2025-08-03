@@ -1,25 +1,36 @@
 version: '3.8'
 
 services:
-  # healthy-api:
-  #   build:
-  #     context: ./Healthy
-  #     dockerfile: Healthy.Api/Dockerfile
-  #     target: build  # Use build stage for development with hot reload
-  #   env_file:
-  #     - env.development
-  #   volumes:
-  #     # Mount source for live development
-  #     - ./Healthy:/src
-  #     - /src/Healthy.Api/bin
-  #     - /src/Healthy.Api/obj
-  #   command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
-  #   ports:
-  #     - "5001:8080"
-  #   depends_on:
-  #     - healthy-db
-  #   networks:
-  #     - healthy-network
+
+  healthy-api:
+    build:
+      context: ./Healthy
+      dockerfile: Healthy.Api/Dockerfile
+      target: build  # Use build stage for development with hot reload
+    env_file:
+      - env.development
+    volumes:
+      # Mount source for live development
+      - ./Healthy:/src
+      - /src/Healthy.Api/bin
+      - /src/Healthy.Api/obj
+      - /src/Healthy.Application/bin
+      - /src/Healthy.Application/obj
+      - /src/Healthy.Domain/bin
+      - /src/Healthy.Domain/obj
+      - /src/Healthy.Infrastructure/bin
+      - /src/Healthy.Infrastructure/obj
+    command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
+    ports:
+      - "5001:8080"
+    restart: unless-stopped
+    depends_on:
+      healthy-db:
+        condition: service_healthy
+      healthy-redis:
+        condition: service_healthy
+    networks:
+      - healthy-network
 
   healthy-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -27,12 +38,19 @@ services:
       SA_PASSWORD: "Dev@Passw0rd123"
       ACCEPT_EULA: "Y"
       MSSQL_PID: "Express"
+      MSSQL_AGENT_ENABLED: "true"
     ports:
       - "1433:1433"
     volumes:
       - healthy-db-dev-data:/var/opt/mssql
+    restart: unless-stopped
     networks:
       - healthy-network
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Dev@Passw0rd123 -Q 'SELECT 1'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   # Redis for caching (optional)
   healthy-redis:
@@ -41,9 +59,15 @@ services:
       - "6380:6379"
     volumes:
       - healthy-redis-dev-data:/data
+    restart: unless-stopped
     networks:
       - healthy-network
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 networks:
   healthy-network:

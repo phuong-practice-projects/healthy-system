@@ -24,17 +24,24 @@ public class DeleteExerciseCommandHandler : IRequestHandler<DeleteExerciseComman
         try
         {
             var exercise = await _context.Exercises
-                .FirstOrDefaultAsync(e => e.Id == request.Id && e.UserId == request.UserId, cancellationToken);
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(e => e.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (exercise == null)
             {
                 return Result<bool>.Failure("Exercise not found or you don't have permission to delete it");
             }
 
-            _context.Exercises.Remove(exercise);
+            if (exercise.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("Exercise is already deleted");
+            }
+
+            // Soft delete the exercise
+            exercise.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Exercise {Id} deleted successfully for user {UserId}", request.Id, request.UserId);
+            _logger.LogInformation("Exercise {Id} soft deleted successfully for user {UserId}", request.Id, request.UserId);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)

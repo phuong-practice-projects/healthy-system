@@ -101,7 +101,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsActive = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new User
             {
@@ -113,7 +113,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsActive = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             }
         );
 
@@ -126,7 +126,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 RoleId = adminRoleId,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new UserRole
             {
@@ -135,7 +135,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 RoleId = userRoleId,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             }
         );
 
@@ -152,7 +152,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Column
             {
@@ -165,7 +165,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Column
             {
@@ -178,7 +178,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Column
             {
@@ -191,7 +191,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Column
             {
@@ -204,7 +204,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             }
         );
 
@@ -220,7 +220,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "健康診断後の記録",
                 CreatedAt = new DateTime(2024, 7, 4, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -232,7 +232,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "ダイエット開始",
                 CreatedAt = new DateTime(2024, 7, 9, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -244,7 +244,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "順調に減量中",
                 CreatedAt = new DateTime(2024, 7, 14, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -256,7 +256,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "運動効果が見えてきた",
                 CreatedAt = new DateTime(2024, 7, 19, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -268,7 +268,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "目標体重に近づいている",
                 CreatedAt = new DateTime(2024, 7, 24, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -280,7 +280,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "理想的な体重に到達",
                 CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new BodyRecord
             {
@@ -292,7 +292,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "維持していきたい",
                 CreatedAt = new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             }
         );
 
@@ -311,7 +311,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "天気が良くて気持ちよかった",
                 CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -326,7 +326,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "腕と胸を重点的に",
                 CreatedAt = new DateTime(2024, 7, 28, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -341,7 +341,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "リラックスできた",
                 CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -356,7 +356,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "久しぶりの水泳で疲れた",
                 CreatedAt = new DateTime(2024, 7, 30, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -371,7 +371,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "景色を楽しみながら",
                 CreatedAt = new DateTime(2024, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -386,7 +386,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "楽しく汗をかけた",
                 CreatedAt = new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Exercise
             {
@@ -401,7 +401,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Notes = "リフレッシュできた",
                 CreatedAt = new DateTime(2024, 8, 2, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             }
         );
 
@@ -416,7 +416,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -427,7 +427,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -438,7 +438,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -449,7 +449,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 28, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 28, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -460,7 +460,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 28, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 28, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -471,7 +471,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -482,7 +482,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -493,7 +493,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 30, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 30, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Meal
             {
@@ -504,7 +504,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Date = new DateTime(2024, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 31, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             }
         );
 
@@ -522,7 +522,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 4, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 4, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -536,7 +536,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 9, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 9, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -550,7 +550,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 14, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 14, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -564,7 +564,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 19, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 19, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -578,7 +578,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 24, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 24, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -592,7 +592,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 27, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -606,7 +606,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 7, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             },
             new Diary
             {
@@ -620,7 +620,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 DiaryDate = new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2024, 8, 1, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = testUserId.ToString(),
-                IsDeleted = false
+                
             }
         );
 
@@ -637,7 +637,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#食事,#ダイエット,#栄養",
                 CreatedAt = new DateTime(2024, 6, 4, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -650,7 +650,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#運動,#フィットネス,#トレーニング",
                 CreatedAt = new DateTime(2024, 6, 9, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -663,7 +663,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#美容,#スキンケア,#アンチエイジング",
                 CreatedAt = new DateTime(2024, 6, 14, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -676,7 +676,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#ウェルネス,#健康,#心理",
                 CreatedAt = new DateTime(2024, 6, 19, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -689,7 +689,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#推奨,#専門家,#総合",
                 CreatedAt = new DateTime(2024, 6, 24, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -702,7 +702,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#ライフスタイル,#習慣,#日常",
                 CreatedAt = new DateTime(2024, 6, 29, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -715,7 +715,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#レシピ,#料理,#ヘルシー",
                 CreatedAt = new DateTime(2024, 7, 4, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             },
             new Category
             {
@@ -728,7 +728,7 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
                 Tags = "#サプリメント,#栄養補助,#健康食品",
                 CreatedAt = new DateTime(2024, 7, 9, 0, 0, 0, DateTimeKind.Utc),
                 CreatedBy = "system",
-                IsDeleted = false
+                
             }
         );
     }

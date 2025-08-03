@@ -52,31 +52,80 @@ The CI/CD pipeline is built using GitHub Actions and provides automated testing,
 - Test verification after updates
 - Pull request creation for updates
 
-## Environment Setup
+## Setup Instructions
 
-### Required Secrets
+### 1. GitHub Repository Configuration
 
-Configure these secrets in your GitHub repository settings:
+#### Required Secrets
+Configure these secrets in your GitHub repository settings (`Settings > Secrets and variables > Actions`):
 
 ```bash
-# Security Scanning
-SNYK_TOKEN=your_snyk_token
+# Security Scanning (Optional but recommended)
+SNYK_TOKEN=your_snyk_token_from_snyk.io
+
+# Code Coverage (Optional)
+CODECOV_TOKEN=your_codecov_token_from_codecov.io
 
 # Deployment (if using external services)
 DEPLOYMENT_TOKEN=your_deployment_token
-PRODUCTION_URL=your_production_url
-DEVELOPMENT_URL=your_development_url
+PRODUCTION_DATABASE_URL=your_production_database_connection_string
 
-# Notifications (optional)
-SLACK_WEBHOOK_URL=your_slack_webhook
-TEAMS_WEBHOOK_URL=your_teams_webhook
+# Notifications (Optional)
+SLACK_WEBHOOK_URL=your_slack_webhook_url
+TEAMS_WEBHOOK_URL=your_teams_webhook_url
 ```
 
-### Environment Protection
+#### Environment Variables
+Configure these variables in your GitHub repository settings (`Settings > Secrets and variables > Actions > Variables`):
 
-Set up environment protection rules for:
-- **development**: Requires PR review for deployment
-- **production**: Requires PR review and approval from maintainers
+```bash
+# Development Environment
+DEVELOPMENT_URL=http://localhost:5001
+
+# Production Environment
+PRODUCTION_URL=https://your-production-domain.com
+
+# Docker Registry (using GitHub Container Registry)
+REGISTRY=ghcr.io
+IMAGE_NAME=${{ github.repository }}
+```
+
+### 2. Environment Protection Rules
+
+Set up environment protection rules in your repository:
+
+1. Go to `Settings > Environments`
+2. Create `development` environment:
+   - Add protection rules if needed
+   - Set environment-specific variables
+3. Create `production` environment:
+   - ✅ Required reviewers (add team maintainers)
+   - ✅ Wait timer (optional: 5 minutes)
+   - ✅ Deployment branches (main branch only)
+
+### 3. Branch Protection Rules
+
+Configure branch protection for `main` and `develop` branches:
+
+1. Go to `Settings > Branches`
+2. Add protection rules:
+   - ✅ Require a pull request before merging
+   - ✅ Require status checks to pass before merging
+   - ✅ Require branches to be up to date before merging
+   - ✅ Include administrators
+   - Status checks: `build-and-test`, `docker-build`, `security-scan`
+
+### 4. Package Registry Setup
+
+The pipeline uses GitHub Container Registry (ghcr.io) by default:
+
+1. Ensure your repository has `packages: write` permission
+2. Images will be automatically pushed to: `ghcr.io/your-username/your-repo`
+3. Images are tagged with:
+   - `latest` (main branch)
+   - `develop` (develop branch)
+   - `v*` (version tags)
+   - `sha-*` (commit SHA)
 
 ## Docker Configuration
 

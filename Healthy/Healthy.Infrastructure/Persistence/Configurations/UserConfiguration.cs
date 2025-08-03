@@ -55,10 +55,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .IsRequired(false)
             .HasMaxLength(450);
 
-        builder.Property(u => u.IsDeleted)
-            .IsRequired()
-            .HasDefaultValue(false);
-
         builder.Property(u => u.DeletedAt)
             .IsRequired(false)
             .HasColumnType("datetime2");
@@ -75,8 +71,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.PhoneNumber)
             .HasDatabaseName("IX_Users_PhoneNumber");
 
-        builder.HasIndex(u => u.IsDeleted)
-            .HasDatabaseName("IX_Users_IsDeleted");
+        builder.HasIndex(u => u.DeletedAt)
+            .HasDatabaseName("IX_Users_DeletedAt");
 
         builder.HasIndex(u => u.CreatedAt)
             .HasDatabaseName("IX_Users_CreatedAt");
@@ -88,6 +84,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .OnDelete(DeleteBehavior.Cascade);
 
         // Query filter for soft delete
-        builder.HasQueryFilter(u => !u.IsDeleted);
+        builder.HasQueryFilter(u => u.DeletedAt == null);
     }
 } 

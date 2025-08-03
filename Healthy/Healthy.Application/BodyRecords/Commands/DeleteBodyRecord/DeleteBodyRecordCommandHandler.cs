@@ -24,17 +24,23 @@ public class DeleteBodyRecordCommandHandler : IRequestHandler<DeleteBodyRecordCo
         try
         {
             var bodyRecord = await _context.BodyRecords
-                .FirstOrDefaultAsync(br => br.Id == request.Id && br.UserId == request.UserId, cancellationToken);
+                .FirstOrDefaultAsync(br => br.Id.ToString().ToLower() == request.Id.ToString().ToLower(), cancellationToken);
 
             if (bodyRecord == null)
             {
                 return Result<bool>.Failure("Body record not found or you don't have permission to delete it");
             }
 
-            _context.BodyRecords.Remove(bodyRecord);
+            if (bodyRecord.DeletedAt.HasValue)
+            {
+                return Result<bool>.Failure("Body record is already deleted");
+            }
+
+            // Soft delete the body record
+            bodyRecord.Delete(); // This will set DeletedAt and DeletedBy
             await _context.SaveChangesAsync(cancellationToken);
 
-            _logger.LogInformation("Body record {Id} deleted successfully for user {UserId}", request.Id, request.UserId);
+            _logger.LogInformation("Body record {Id} soft deleted successfully for user {UserId}", request.Id, request.UserId);
             return Result<bool>.Success(true);
         }
         catch (Exception ex)
