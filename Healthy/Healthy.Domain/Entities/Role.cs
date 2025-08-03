@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Healthy.Domain.Common;
 
 namespace Healthy.Domain.Entities;
 
-public class Role : BaseEntity
+public class Role : EntityBase
 {
     [Required]
     [MaxLength(50)]

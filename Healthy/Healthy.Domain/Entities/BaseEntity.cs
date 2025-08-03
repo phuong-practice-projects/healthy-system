@@ -1,22 +1,26 @@
-using System.ComponentModel.DataAnnotations;
+using Healthy.Domain.Common;
 
 namespace Healthy.Domain.Entities;
 
-public abstract class BaseEntity
+/// <summary>
+/// Legacy base entity class - inherits from EntityAuditableBase
+/// Use EntityAuditableBase directly for new entities
+/// </summary>
+[Obsolete("Use EntityAuditableBase from Healthy.Domain.Common instead")]
+public abstract class BaseEntity : EntityAuditableBase
 {
-    [Key]
-    public Guid Id { get; set; }
-    
-    public DateTime CreatedAt { get; set; }
-    
-    public DateTime? UpdatedAt { get; set; }
-    
-    public bool IsDeleted { get; set; }
-    
-    protected BaseEntity()
+    /// <summary>
+    /// Initializes a new instance of the BaseEntity class
+    /// </summary>
+    protected BaseEntity() : base()
     {
-        Id = Guid.NewGuid();
-        CreatedAt = DateTime.UtcNow;
-        IsDeleted = false;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the BaseEntity class with specified id
+    /// </summary>
+    /// <param name="id">The unique identifier</param>
+    protected BaseEntity(Guid id) : base(id)
+    {
     }
 } 

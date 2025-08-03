@@ -1,8 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Healthy.Domain.Common;
 
 namespace Healthy.Domain.Entities;
 
-public class User : BaseEntity
+public class User : EntityAuditableBase
 {
     [Required]
     [MaxLength(100)]
@@ -35,6 +36,10 @@ public class User : BaseEntity
     
     // Navigation properties
     public virtual ICollection<UserRole> UserRoles { get; set; } = new List<UserRole>();
+    public virtual ICollection<BodyRecord> BodyRecords { get; set; } = new List<BodyRecord>();
+    public virtual ICollection<Exercise> Exercises { get; set; } = new List<Exercise>();
+    public virtual ICollection<Diary> Diaries { get; set; } = new List<Diary>();
+    public virtual ICollection<Meal> Meals { get; set; } = new List<Meal>();
     
     // Computed properties
     public string FullName => $"{FirstName} {LastName}".Trim();
