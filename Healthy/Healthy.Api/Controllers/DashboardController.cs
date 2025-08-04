@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Healthy.Application.Meals.Queries.GetMealHistory;
-using Healthy.Application.BodyRecords.Queries.GetBodyRecordGraph;
-using Healthy.Application.Dashboard.Queries.GetDashboardAchievement;
-using Healthy.Application.Dashboard.Queries.GetDashboardSummary;
 using Healthy.Application.Common.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardSummary;
+using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardAchievement;
+using Healthy.Application.UseCases.Meals.Queries.GetMealHistory;
+using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecordGraph;
 
 namespace Healthy.Api.Controllers;
 

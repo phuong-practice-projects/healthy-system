@@ -1,8 +1,8 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Healthy.Application.Columns.Queries.GetColumns;
 using Healthy.Tests.Unit.Common;
 using Healthy.Infrastructure.Persistence;
+using Healthy.Application.UseCases.Columns.Queries.GetColumns;
 
 namespace Healthy.Tests.Unit.Application.Columns.Queries;
 

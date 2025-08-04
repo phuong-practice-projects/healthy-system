@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Healthy.Domain\Healthy.Domain.csproj" />
     <ProjectReference Include="..\Healthy.Application\Healthy.Application.csproj" />
     <ProjectReference Include="..\Healthy.Infrastructure\Healthy.Infrastructure.csproj" />

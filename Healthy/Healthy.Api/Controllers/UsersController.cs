@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Healthy.Application.Users.Commands.UpdateUser;
-using Healthy.Application.Users.Commands.DeleteUser;
-using Healthy.Application.Users.Queries.GetUser;
-using Healthy.Application.Users.Queries.GetUsers;
-using Healthy.Application.Users.Queries.GetUsersWithFilters;
 using Healthy.Application.Common.Models;
+using Healthy.Application.UseCases.Users.Queries.GetUsers;
+using Healthy.Application.UseCases.Users.Queries.GetUser;
+using Healthy.Application.UseCases.Users.Queries.GetUsersWithFilters;
+using Healthy.Application.UseCases.Users.Commands.DeleteUser;
+using Healthy.Application.UseCases.Users.Commands.UpdateUser;
 
 namespace Healthy.Api.Controllers;
 

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using Healthy.Application.Users.Commands.Login;
-using Healthy.Application.Users.Commands.Register;
 using Healthy.Application.Common.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using Healthy.Application.UseCases.Users.Commands.Login;
+using Healthy.Application.UseCases.Users.Commands.Register;
 
 namespace Healthy.Api.Controllers;
 

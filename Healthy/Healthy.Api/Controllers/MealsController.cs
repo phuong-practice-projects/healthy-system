@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Healthy.Application.Meals.Commands.CreateMeal;
-using Healthy.Application.Meals.Commands.UpdateMeal;
-using Healthy.Application.Meals.Commands.DeleteMeal;
-using Healthy.Application.Meals.Queries.GetMeals;
 using Healthy.Application.Common.Models;
 using Swashbuckle.AspNetCore.Annotations;
+using Healthy.Application.UseCases.Meals.Queries.GetMeals;
+using Healthy.Application.UseCases.Meals.Commands.CreateMeal;
+using Healthy.Application.UseCases.Meals.Commands.UpdateMeal;
+using Healthy.Application.UseCases.Meals.Commands.DeleteMeal;
 
 namespace Healthy.Api.Controllers;
 

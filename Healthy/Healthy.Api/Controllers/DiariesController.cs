@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Healthy.Application.Diaries.Commands.CreateDiary;
-using Healthy.Application.Diaries.Commands.UpdateDiary;
-using Healthy.Application.Diaries.Commands.DeleteDiary;
-using Healthy.Application.Diaries.Queries.GetDiary;
-using Healthy.Application.Diaries.Queries.GetDiaries;
 using Healthy.Application.Common.Models;
+using Healthy.Application.UseCases.Diaries.Queries.GetDiaries;
+using Healthy.Application.UseCases.Diaries.Queries.GetDiary;
+using Healthy.Application.UseCases.Diaries.Commands.CreateDiary;
+using Healthy.Application.UseCases.Diaries.Commands.DeleteDiary;
+using Healthy.Application.UseCases.Diaries.Commands.UpdateDiary;
 
 namespace Healthy.Api.Controllers;
 

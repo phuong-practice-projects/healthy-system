@@ -11,10 +11,16 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        // Get connection string from environment variables or configuration
+        // Get connection string from environment variable or configuration (no fallback defaults)
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection") 
-            ?? configuration.GetConnectionString("DefaultConnection")
-            ?? "Server=localhost,1433;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;";
+            ?? configuration.GetConnectionString("DefaultConnection");
+        
+        if (string.IsNullOrEmpty(connectionString))
+        {
+            throw new InvalidOperationException("Database connection string is not configured. Please set ConnectionStrings__DefaultConnection environment variable or add it to appsettings.json");
+        }
+        
+        Console.WriteLine($"[DB] Using connection string: {MaskConnectionString(connectionString)}");
         
         // Add Database Context
         services.AddDbContext<ApplicationDbContext>(options =>
@@ -22,7 +28,7 @@ public static class DependencyInjection
                 connectionString,
                 b => b.MigrationsAssembly("Healthy.Infrastructure")
                       .EnableRetryOnFailure(
-                          maxRetryCount: 3,
+                          maxRetryCount: 5,
                           maxRetryDelay: TimeSpan.FromSeconds(30),
                           errorNumbersToAdd: null)));
 
@@ -36,5 +42,21 @@ public static class DependencyInjection
         services.AddScoped<DatabaseSeeder>();
 
         return services;
+    }
+
+    /// <summary>
+    /// Mask sensitive information in connection string for logging
+    /// </summary>
+    private static string MaskConnectionString(string connectionString)
+    {
+        if (string.IsNullOrEmpty(connectionString))
+            return "Empty connection string";
+
+        // Use regex to mask any password in connection string
+        return System.Text.RegularExpressions.Regex.Replace(
+            connectionString, 
+            @"Password=([^;]+)", 
+            "Password=***", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
     }
 } 

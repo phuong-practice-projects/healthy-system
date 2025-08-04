@@ -1,12 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using MediatR;
-using Healthy.Application.Exercises.Commands.CreateExercise;
-using Healthy.Application.Exercises.Commands.UpdateExercise;
-using Healthy.Application.Exercises.Commands.DeleteExercise;
-using Healthy.Application.Exercises.Queries.GetExercise;
-using Healthy.Application.Exercises.Queries.GetExercises;
 using Healthy.Application.Common.Models;
+using Healthy.Application.UseCases.Exercises.Commands.DeleteExercise;
+using Healthy.Application.UseCases.Exercises.Queries.GetExercises;
+using Healthy.Application.UseCases.Exercises.Queries.GetExercise;
+using Healthy.Application.UseCases.Exercises.Commands.UpdateExercise;
+using Healthy.Application.UseCases.Exercises.Commands.CreateExercise;
 
 namespace Healthy.Api.Controllers;
 

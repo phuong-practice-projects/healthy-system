@@ -3,12 +3,12 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Healthy.Api.Controllers;
-using Healthy.Application.Columns.Queries.GetColumns;
-using Healthy.Application.Columns.Queries.GetColumn;
-using Healthy.Application.Columns.Commands.CreateColumn;
-using Healthy.Application.Columns.Commands.UpdateColumn;
-using Healthy.Application.Columns.Commands.DeleteColumn;
 using Healthy.Application.Common.Models;
+using Healthy.Application.UseCases.Columns.Commands.CreateColumn;
+using Healthy.Application.UseCases.Columns.Commands.DeleteColumn;
+using Healthy.Application.UseCases.Columns.Commands.UpdateColumn;
+using Healthy.Application.UseCases.Columns.Queries.GetColumn;
+using Healthy.Application.UseCases.Columns.Queries.GetColumns;
 
 namespace Healthy.Tests.Unit.Api.Controllers;
 

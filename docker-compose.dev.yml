@@ -1,16 +1,19 @@
-version: '3.8'
-
 services:
-
   healthy-api:
     build:
       context: ./Healthy
       dockerfile: Healthy.Api/Dockerfile
-      target: build  # Use build stage for development with hot reload
-    env_file:
-      - env.development
+      target: build
+    ports:
+      - "5001:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - DOTNET_USE_POLLING_FILE_WATCHER=true
+      - DOTNET_RUNNING_IN_CONTAINER=true
+      - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
+      - ConnectionStrings__DefaultConnection=Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
     volumes:
-      # Mount source for live development
       - ./Healthy:/src
       - /src/Healthy.Api/bin
       - /src/Healthy.Api/obj
@@ -20,61 +23,24 @@ services:
       - /src/Healthy.Domain/obj
       - /src/Healthy.Infrastructure/bin
       - /src/Healthy.Infrastructure/obj
-    command: ["dotnet", "run", "--project", "/src/Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080"]
-    ports:
-      - "5001:8080"
-    restart: unless-stopped
+    working_dir: /src
+    command: ["dotnet", "watch", "run", "--project", "Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080", "--no-restore"]
     depends_on:
-      healthy-db:
-        condition: service_healthy
-      healthy-redis:
-        condition: service_healthy
-    networks:
-      - healthy-network
+      - healthy-db
+    restart: unless-stopped
 
   healthy-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      SA_PASSWORD: "Dev@Passw0rd123"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
-      MSSQL_AGENT_ENABLED: "true"
+      - SA_PASSWORD=Dev@Passw0rd123
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
     ports:
       - "1433:1433"
     volumes:
-      - healthy-db-dev-data:/var/opt/mssql
+      - healthy-db-data:/var/opt/mssql
     restart: unless-stopped
-    networks:
-      - healthy-network
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Dev@Passw0rd123 -Q 'SELECT 1'"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-  # Redis for caching (optional)
-  healthy-redis:
-    image: redis:7-alpine
-    ports:
-      - "6380:6379"
-    volumes:
-      - healthy-redis-dev-data:/data
-    restart: unless-stopped
-    networks:
-      - healthy-network
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-
-networks:
-  healthy-network:
-    driver: bridge
 
 volumes:
-  healthy-db-dev-data:
-    driver: local
-  healthy-redis-dev-data:
-    driver: local
+  healthy-db-data:
+ 

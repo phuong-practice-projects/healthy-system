@@ -9,9 +9,6 @@ public class AppConfiguration
     // Database Settings
     public DatabaseConfig Database { get; set; } = new();
     
-    // Redis Settings
-    public RedisConfig Redis { get; set; } = new();
-    
     // API Settings
     public ApiConfig Api { get; set; } = new();
     
@@ -42,17 +39,6 @@ public class DatabaseConfig
     public string GetConnectionString()
     {
         return $"Server={Server};Database={Name};User Id={User};Password={Password};TrustServerCertificate={TrustServerCertificate};";
-    }
-}
-
-public class RedisConfig
-{
-    public string Host { get; set; } = "localhost";
-    public int Port { get; set; } = 6379;
-    
-    public string GetConnectionString()
-    {
-        return $"{Host}:{Port}";
     }
 }
 

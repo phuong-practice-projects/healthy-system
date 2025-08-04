@@ -31,7 +31,7 @@ public class JwtService : IJwtService
         _logger.LogInformation("  ExpirationInMinutes: {Expiration}", _jwtSettings.ExpirationInMinutes);
         
         var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
+        var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey??string.Empty);
 
         var claims = new List<Claim>
         {

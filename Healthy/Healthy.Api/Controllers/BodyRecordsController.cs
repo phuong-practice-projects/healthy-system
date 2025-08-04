@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using MediatR;
-using Healthy.Application.BodyRecords.Commands.CreateBodyRecord;
-using Healthy.Application.BodyRecords.Commands.UpdateBodyRecord;
-using Healthy.Application.BodyRecords.Commands.DeleteBodyRecord;
-using Healthy.Application.BodyRecords.Queries.GetBodyRecord;
-using Healthy.Application.BodyRecords.Queries.GetBodyRecords;
-using Healthy.Application.BodyRecords.Queries.GetBodyRecordGraph;
 using Healthy.Application.Common.Models;
+using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecords;
+using Healthy.Application.UseCases.BodyRecords.Commands.DeleteBodyRecord;
+using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecordGraph;
+using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecord;
+using Healthy.Application.UseCases.BodyRecords.Commands.CreateBodyRecord;
+using Healthy.Application.UseCases.BodyRecords.Commands.UpdateBodyRecord;
 
 namespace Healthy.Api.Controllers;
 
