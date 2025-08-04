@@ -1,11 +1,27 @@
 ﻿namespace Healthy.Application.Common.Models
 {
-    public class BodyRecordsListResponse
+    /// <summary>
+    /// Response model for body records list with pagination - inherits from generic base
+    /// </summary>
+    public class BodyRecordsListResponse : BasePaginatedResponse<BodyRecordDto>
     {
-        public List<BodyRecordDto> BodyRecords { get; set; } = new();
-        public int TotalItems { get; set; }
-        public int TotalPages { get; set; }
-        public int CurrentPage { get; set; }
-        public int PageSize { get; set; }
+        /// <summary>
+        /// List of body records - provides backward compatibility alias for Items
+        /// </summary>
+        public List<BodyRecordDto> BodyRecords 
+        { 
+            get => Items; 
+            set => Items = value; 
+        }
+
+        /// <summary>
+        /// Create a body records list response with pagination info
+        /// </summary>
+        public static BodyRecordsListResponse Create(List<BodyRecordDto> bodyRecords, int totalItems, int currentPage, int pageSize)
+        {
+            var response = new BodyRecordsListResponse();
+            response.SetPaginationData(bodyRecords, totalItems, currentPage, pageSize);
+            return response;
+        }
     }
 }

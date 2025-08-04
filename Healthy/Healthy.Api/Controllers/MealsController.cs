@@ -22,13 +22,18 @@ public class MealsController(IMediator mediator) : BaseController
     /// <param name="startDate">Optional start date filter</param>
     /// <param name="endDate">Optional end date filter</param>
     /// <param name="type">Optional meal type filter (Morning, Lunch, Dinner, Snack)</param>
+    /// <param name="searchTerm">Optional search term for meal name or description</param>
+    /// <param name="minCalories">Optional minimum calories filter</param>
+    /// <param name="maxCalories">Optional maximum calories filter</param>
+    /// <param name="sortBy">Optional sorting field (Date, Calories, Name, Type)</param>
+    /// <param name="sortDirection">Sort direction (Asc, Desc)</param>
     /// <param name="page">Page number (default: 1)</param>
-    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <param name="pageSize">Page size (default: 10, max: 100)</param>
     /// <returns>List of meals with pagination info</returns>
     [HttpGet]
     [SwaggerOperation(
-        Summary = "Get user meals with pagination",
-        Description = "Retrieves all meals for the current user with optional filters and pagination support",
+        Summary = "Get user meals with pagination and advanced filters",
+        Description = "Retrieves all meals for the current user with optional filters, search, sorting and pagination support",
         OperationId = "GetMeals",
         Tags = new[] { "Meals" }
     )]
@@ -40,6 +45,11 @@ public class MealsController(IMediator mediator) : BaseController
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null,
         [FromQuery] string? type = null,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] int? minCalories = null,
+        [FromQuery] int? maxCalories = null,
+        [FromQuery] string sortBy = "Date",
+        [FromQuery] string sortDirection = "Desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
@@ -55,6 +65,11 @@ public class MealsController(IMediator mediator) : BaseController
             StartDate = startDate,
             EndDate = endDate,
             Type = type,
+            SearchTerm = searchTerm,
+            MinCalories = minCalories,
+            MaxCalories = maxCalories,
+            SortBy = sortBy,
+            SortDirection = sortDirection,
             Page = page,
             PageSize = pageSize
         };

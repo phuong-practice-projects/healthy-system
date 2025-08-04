@@ -2,6 +2,7 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Healthy.Application.Common.Interfaces;
 using Healthy.Application.Common.Models;
+using Healthy.Application.Common.Extensions;
 
 namespace Healthy.Application.Exercises.Queries.GetExercises;
 
@@ -34,6 +35,9 @@ public class GetExercisesQueryHandler : IRequestHandler<GetExercisesQuery, Exerc
             query = query.Where(e => e.Category == request.Category);
         }
 
+        // Get total count first
+        var totalItems = await query.CountAsync(cancellationToken);
+
         var exercises = await query
             .OrderByDescending(e => e.ExerciseDate)
             .Skip((request.Page - 1) * request.PageSize)
@@ -51,9 +55,6 @@ public class GetExercisesQueryHandler : IRequestHandler<GetExercisesQuery, Exerc
             })
             .ToListAsync(cancellationToken);
 
-        return new ExerciseListResponse
-        {
-            Exercises = exercises
-        };
+        return ExerciseListResponse.Create(exercises, totalItems, request.Page, request.PageSize);
     }
 }

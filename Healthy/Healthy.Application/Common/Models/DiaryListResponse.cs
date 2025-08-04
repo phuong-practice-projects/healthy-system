@@ -1,6 +1,26 @@
 namespace Healthy.Application.Common.Models;
 
-public class DiaryListResponse
+/// <summary>
+/// Response model for diary list with pagination
+/// </summary>
+public class DiaryListResponse : BasePaginatedResponse<DiaryDto>
 {
-    public List<DiaryDto> Diaries { get; set; } = new List<DiaryDto>();
+    /// <summary>
+    /// List of diaries for the current page (alias for Items property)
+    /// </summary>
+    public List<DiaryDto> Diaries 
+    { 
+        get => Items; 
+        set => Items = value; 
+    }
+
+    /// <summary>
+    /// Create a diary list response with pagination info
+    /// </summary>
+    public static DiaryListResponse Create(List<DiaryDto> diaries, int totalItems, int currentPage, int pageSize)
+    {
+        var response = new DiaryListResponse();
+        response.SetPaginationData(diaries, totalItems, currentPage, pageSize);
+        return response;
+    }
 }

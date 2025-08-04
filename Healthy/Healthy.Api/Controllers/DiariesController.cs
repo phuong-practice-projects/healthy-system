@@ -16,14 +16,19 @@ public class DiariesController(IMediator mediator) : BaseController
 {
 
     /// <summary>
-    /// Get diary list for the current user
+    /// Get diary list for the current user with advanced filters
     /// </summary>
     /// <param name="startDate">Optional start date filter</param>
     /// <param name="endDate">Optional end date filter</param>
     /// <param name="isPrivate">Optional privacy filter</param>
+    /// <param name="searchTerm">Optional search term for title or content</param>
+    /// <param name="mood">Optional mood filter</param>
+    /// <param name="tags">Optional tags filter (comma-separated)</param>
+    /// <param name="sortBy">Optional sorting field (Date, Title, Mood)</param>
+    /// <param name="sortDirection">Sort direction (Asc, Desc)</param>
     /// <param name="page">Page number (default: 1)</param>
-    /// <param name="pageSize">Page size (default: 10)</param>
-    /// <returns>List of diaries</returns>
+    /// <param name="pageSize">Page size (default: 10, max: 100)</param>
+    /// <returns>List of diaries with pagination info</returns>
     [HttpGet]
     [ProducesResponseType(typeof(DiaryListResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -31,6 +36,11 @@ public class DiariesController(IMediator mediator) : BaseController
         [FromQuery] DateTime? startDate = null,
         [FromQuery] DateTime? endDate = null,
         [FromQuery] bool? isPrivate = null,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? mood = null,
+        [FromQuery] string? tags = null,
+        [FromQuery] string sortBy = "Date",
+        [FromQuery] string sortDirection = "Desc",
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10)
     {
@@ -46,6 +56,11 @@ public class DiariesController(IMediator mediator) : BaseController
             StartDate = startDate,
             EndDate = endDate,
             IsPrivate = isPrivate,
+            SearchTerm = searchTerm,
+            Mood = mood,
+            Tags = tags,
+            SortBy = sortBy,
+            SortDirection = sortDirection,
             Page = page,
             PageSize = pageSize
         };

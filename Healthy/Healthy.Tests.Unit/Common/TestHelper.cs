@@ -50,7 +50,6 @@ public static class TestHelper
                 Tags = "#魚料理,#和食,#DHA",
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
             },
             new Column
             {
@@ -62,7 +61,6 @@ public static class TestHelper
                 Tags = "#ダイエット,#ヘルシー,#レシピ",
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
             },
             new Column
             {
@@ -74,7 +72,6 @@ public static class TestHelper
                 Tags = "#美容,#アンチエイジング,#スキンケア",
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
             },
             new Column
             {
@@ -86,7 +83,6 @@ public static class TestHelper
                 Tags = "#運動,#健康,#初心者",
                 IsPublished = false, // Unpublished column for testing
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = false
             },
             new Column
             {
@@ -98,7 +94,6 @@ public static class TestHelper
                 Tags = "#栄養,#免疫力,#バランス",
                 IsPublished = true,
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
-                IsDeleted = true // Soft deleted column for testing
             }
         };
     }

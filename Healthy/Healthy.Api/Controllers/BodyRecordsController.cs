@@ -16,21 +16,14 @@ public class BodyRecordsController(IMediator mediator) : BaseController
 {
 
     /// <summary>
-    /// Get all body records for the current user
+    /// Get all body records for the current user with advanced filters
     /// </summary>
-    /// <param name="startDate">Optional start date filter</param>
-    /// <param name="endDate">Optional end date filter</param>
-    /// <param name="page">Page number (default: 1)</param>
-    /// <param name="pageSize">Page size (default: 10)</param>
+    /// <param name="request">Query parameters for filtering and pagination</param>
     /// <returns>List of body records with pagination</returns>
     [HttpGet]
     [ProducesResponseType(typeof(BodyRecordsListResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<BodyRecordsListResponse>> GetBodyRecords(
-        [FromQuery] DateTime? startDate = null,
-        [FromQuery] DateTime? endDate = null,
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10)
+    public async Task<ActionResult<BodyRecordsListResponse>> GetBodyRecords([FromQuery] GetBodyRecordsQueryRequest request)
     {
         var userIdString = GetCurrentUserId();
         if (string.IsNullOrEmpty(userIdString) || !Guid.TryParse(userIdString, out var userId))
@@ -38,14 +31,8 @@ public class BodyRecordsController(IMediator mediator) : BaseController
             return Unauthorized();
         }
 
-        var query = new GetBodyRecordsQuery
-        {
-            UserId = userId,
-            StartDate = startDate,
-            EndDate = endDate,
-            Page = page,
-            PageSize = pageSize
-        };
+        // Create query with user ID - using record 'with' expression for immutable update
+        var query = request with { UserId = userId };
 
         var result = await mediator.Send(query);
         return Ok(result);

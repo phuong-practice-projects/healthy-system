@@ -35,6 +35,9 @@ public class GetDiariesQueryHandler : IRequestHandler<GetDiariesQuery, DiaryList
             query = query.Where(d => d.IsPrivate == request.IsPrivate.Value);
         }
 
+        // Get total count first
+        var totalItems = await query.CountAsync(cancellationToken);
+
         var diaries = await query
             .OrderByDescending(d => d.DiaryDate)
             .Skip((request.Page - 1) * request.PageSize)
@@ -51,9 +54,6 @@ public class GetDiariesQueryHandler : IRequestHandler<GetDiariesQuery, DiaryList
             })
             .ToListAsync(cancellationToken);
 
-        return new DiaryListResponse
-        {
-            Diaries = diaries
-        };
+        return DiaryListResponse.Create(diaries, totalItems, request.Page, request.PageSize);
     }
 }
