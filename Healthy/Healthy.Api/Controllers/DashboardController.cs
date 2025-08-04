@@ -17,7 +17,6 @@ namespace Healthy.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/dashboard")]
-[UserOrAdmin]
 [SwaggerTag("Enterprise-grade dashboard with both micro-APIs and aggregated endpoints for optimal performance")]
 public class DashboardController(IMediator mediator) : BaseController
 {
@@ -29,7 +28,6 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <param name="type">Optional meal type filter for targeted loading</param>
     /// <returns>Lightweight meal data for immediate display</returns>
     [HttpGet("meals-today")]
-    [Authorize(Roles = "User,Admin")]
     [SwaggerOperation(
         Summary = "Get today's meals",
         Description = "Fast-loading endpoint for today's meal data with statistics. Optimized for immediate UI rendering and progressive loading.",
@@ -63,7 +61,6 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <param name="date">Optional date for historical data (default: today)</param>
     /// <returns>Goal completion percentages</returns>
     [HttpGet("achievements")]
-    [Authorize(Roles = "User,Admin")]
     [SwaggerOperation(
         Summary = "Get achievement rates",
         Description = "Lightweight endpoint for goal completion tracking. Perfect for progress indicators and charts.",

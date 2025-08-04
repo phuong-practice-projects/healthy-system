@@ -4,6 +4,10 @@
 
 The Healthy System uses Entity Framework Core with SQL Server for data management. The database is designed with main entities and appropriate relationships to support user health management.
 
+**Database Version**: HealthyDB  
+**Current Migration**: 20250804174116_UpdateSeedData  
+**Environment**: Development
+
 ## Entity Relationship Diagram
 
 ```mermaid
@@ -211,23 +215,36 @@ erDiagram
   - `UpdatedAt`: Last update date
   - `CreatedBy`: Creator
   - `UpdatedBy`: Last updater
-  - `IsDeleted`: Soft delete flag
-  - `DeletedAt`: Deletion date
-  - `DeletedBy`: Deleter
+  - `DeletedAt`: Soft delete timestamp (nullable)
+  - `DeletedBy`: Deleter identifier
+  - `IsDeleted`: Computed property (`DeletedAt.HasValue`) - No longer a database column
 - **Used by**: User, UserRole, BodyRecord, Exercise, Meal, Diary, Column, Category
 
-## Indexes and Constraints
+## Current Indexes and Constraints
 
-### User
-- **Unique Index**: Email
-- **Index**: PhoneNumber, IsDeleted, CreatedAt
+### User Table
+- **Unique Index**: Email (prevents duplicate email addresses)
+- **Index**: PhoneNumber, CreatedAt, DeletedAt
+- ~~**Index**: IsDeleted~~ (Removed - now uses DeletedAt index)
 
-### UserRole
-- **Unique Index**: (UserId, RoleId)
+### UserRole Table
+- **Unique Index**: (UserId, RoleId) - prevents duplicate role assignments
 
-### Soft Delete
-- All entities inheriting `EntityAuditableBase` have query filter `!IsDeleted`
-- No physical deletion, only marking IsDeleted = true
+### Performance Indexes
+- **BodyRecords**: RecordDate, UserId, (UserId + RecordDate), DeletedAt
+- **Categories**: CategoryType, CreatedAt, IsActive, DeletedAt
+- **Exercises**: ExerciseDate, UserId, (UserId + ExerciseDate), DeletedAt
+- **Meals**: Date, UserId, (UserId + Date), DeletedAt
+- **Diaries**: DiaryDate, UserId, (UserId + DiaryDate), DeletedAt
+- **UserRoles**: DeletedAt
+
+### Soft Delete Implementation (Updated August 2025)
+- ✅ **Still Active** - Uses `DeletedAt` timestamp approach
+- ✅ **Computed Property**: `IsDeleted => DeletedAt.HasValue`
+- ✅ **Database Columns**: `DeletedAt` (DateTime?), `DeletedBy` (string?)
+- ❌ **Removed**: `IsDeleted` boolean column (replaced with computed property)
+- ✅ **Query Filters**: Entities with `DeletedAt != null` are filtered out
+- ✅ **Performance**: Indexes on `DeletedAt` for efficient queries
 
 ## Cascade Delete Behavior
 
@@ -263,24 +280,76 @@ erDiagram
 
 ## Connection String Configuration
 
+### Current Configuration (August 5, 2025)
+
+**Development Environment:**
 ```plaintext
-Server=localhost,1433;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
+Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
 ```
 
-## Migrations
+**Host/Migration Environment:**
+```plaintext
+Server=localhost,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
+```
 
+### Configuration Details
+- **Database Name**: HealthyDB (not HealthyDB_Dev)
+- **Server**: 
+  - Container: `healthy-db` (Docker internal)
+  - Host: `localhost:1433` (for migrations and external access)
+- **Authentication**: SQL Server Authentication
+- **Password**: Dev@Passw0rd123! (with exclamation mark)
+- **Security**: TrustServerCertificate=true, Encrypt=false
+
+## Current Migrations Status
+
+### Active Migrations (3 total)
+1. **20250803102630_InitialEntitiesAndSeedData** - Initial database schema with all entities and seed data
+2. **20250803155957_RemoveIsDeletedColumn** - Replaced `IsDeleted` boolean column with `DeletedAt` timestamp approach for soft delete
+3. **20250804174116_UpdateSeedData** - Updated seed data with current values
+
+### Migration Management
 - **Auto Migration**: Enabled in Development environment
-- **Seed Data**: Automatically executed during database initialization
-- **Script**: `scripts/update-database.ps1` for manual database updates
+- **Seed Data**: Automatically executed during database initialization  
+- **Manual Script**: `scripts/update-database.ps1` for manual database updates
+- **Batch Script**: `update-database.bat` for Windows CMD users
+
+## 📊 Current Database Status (August 5, 2025)
+
+### Live Configuration
+| Component | Status | Details |
+|-----------|--------|---------|
+| **Database** | ✅ Active | HealthyDB on SQL Server 2022 Express |
+| **Connection** | ✅ Healthy | Container: healthy-db:1433, Host: localhost:1433 |
+| **Migrations** | ✅ Current | 3 migrations applied successfully |
+| **Seed Data** | ✅ Loaded | Users, Roles, Sample Content available |
+| **Auto Migration** | ✅ Enabled | Automatic on container startup |
+
+### Tables Overview
+| Table | Records | Purpose | Status |
+|-------|---------|---------|---------|
+| **Users** | ~2 | User accounts (Admin, Test User) | ✅ Active |
+| **Roles** | 3 | System roles (Admin, User, Moderator) | ✅ Active |
+| **UserRoles** | ~2 | User-role assignments | ✅ Active |
+| **BodyRecords** | 0 | Body measurements | ✅ Ready |
+| **Exercises** | 0 | Exercise tracking | ✅ Ready |
+| **Meals** | 0 | Meal records | ✅ Ready |
+| **Diaries** | 0 | Personal diary entries | ✅ Ready |
+| **Columns** | ~5 | Health articles | ✅ Seeded |
+| **Categories** | 0 | Content categories | ✅ Ready |
 
 ## Technical Notes
 
+### Current Technical Implementation
+
 1. **Timezone**: All DateTime values are stored in UTC
-2. **Password Hashing**: Uses BCrypt
-3. **Soft Delete**: Applied to all auditable entities
+2. **Password Hashing**: Uses BCrypt with cost factor 11
+3. **Soft Delete**: ✅ Active - Uses `DeletedAt` timestamp approach (not boolean column)
 4. **Connection Pool**: Uses SQL Server connection pooling
 5. **Transaction**: Entity Framework automatically manages transactions
-6. **Performance**: Appropriate indexes for common queries
+6. **Performance**: Appropriate indexes for common queries including DeletedAt
+7. **Entity Framework**: .NET 8 with Entity Framework Core
+8. **Database Provider**: Microsoft.EntityFrameworkCore.SqlServer
 
 ## Database Schema Overview
 
@@ -300,10 +369,12 @@ Server=localhost,1433;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123
 - **Categories**: Content categorization system
 
 ### Audit Trail
-All tables (except Roles) include full audit trail:
+Most tables include audit trail information:
 - Creation tracking (CreatedAt, CreatedBy)
 - Modification tracking (UpdatedAt, UpdatedBy)
-- Soft deletion (IsDeleted, DeletedAt, DeletedBy)
+- Soft deletion (DeletedAt, DeletedBy with computed IsDeleted property)
+
+**Note**: Soft delete implementation was improved in August 2025 - replaced `IsDeleted` boolean column with `DeletedAt` timestamp approach for better performance and data integrity.
 
 ## Data Integrity
 
@@ -320,6 +391,29 @@ All tables (except Roles) include full audit trail:
 
 ### Security Considerations
 - GUID primary keys prevent enumeration attacks
-- Password hashing with BCrypt
-- Soft delete preserves audit trail
-- Index on IsDeleted for performance with soft deletes
+- Password hashing with BCrypt (cost factor 11)
+- Soft delete preserves audit trail using `DeletedAt` timestamp
+- Indexes on `DeletedAt` for efficient soft delete queries
+- Email uniqueness prevents account conflicts
+- Foreign key constraints maintain referential integrity
+
+---
+
+## 📝 Changelog
+
+### August 5, 2025
+- ✅ **Updated database configuration**: Corrected connection string and database name
+- ✅ **Documented migration history**: Added current 3 migrations with descriptions
+- ✅ **Clarified soft delete implementation**: Updated to reflect `DeletedAt` timestamp approach
+- ✅ **Added current status section**: Live database status and table overview
+- ✅ **Updated technical notes**: Reflected current Entity Framework and .NET versions
+- ✅ **Enhanced indexes documentation**: Updated to reflect current database schema including DeletedAt indexes
+- ✅ **Corrected soft delete documentation**: Clarified that soft delete is still active but uses improved implementation
+
+### Current Database State
+- **Active Database**: HealthyDB (SQL Server 2022 Express)
+- **Migrations Applied**: 3 (Initial, Improve Soft Delete, Update Seed Data)
+- **Soft Delete**: ✅ Active using `DeletedAt` timestamp approach (improved August 2025)
+- **Auto Migration**: ✅ Enabled in development
+- **Connection**: Container (healthy-db) + Host (localhost:1433)
+- **Seeded Data**: Users, Roles, Sample Articles available

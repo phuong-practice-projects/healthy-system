@@ -3,13 +3,30 @@
 ## Overview
 This guide explains how to manage Entity Framework Core migrations for the Healthy System project. The project uses **IDesignTimeDbContextFactory** for automatic connection string handling and includes detailed commands for both CMD/PowerShell and Visual Studio Package Manager Console.
 
+**Last Updated**: August 5, 2025  
+**Current Database**: HealthyDB  
+**Environment**: Development
+
 ## Quick Start
 
 ### Method 1: Automated Script (Recommended)
+
+**PowerShell Script (Windows/Cross-platform):**
 ```powershell
 # Run the automated PowerShell script
 .\scripts\update-database.ps1
 
+# With verbose output
+.\scripts\update-database.ps1 -Verbose
+
+# Force restart database container
+.\scripts\update-database.ps1 -Force
+```
+
+**Batch File (Windows CMD):**
+```cmd
+rem Run the automated batch script
+.\update-database.bat
 ```
 
 ### Method 2: Using Package Manager Console (Visual Studio)
@@ -25,17 +42,56 @@ docker-compose -f docker-compose.dev.yml up healthy-db -d
 Update-Database
 ```
 
-### Method 3: Using .NET CLI / CMD
+### Method 3: Using .NET CLI / PowerShell
 
+```powershell
+# Start database container first
+docker-compose -f docker-compose.dev.yml up healthy-db -d
+
+# Wait for database to be ready (15 seconds recommended)
+Start-Sleep -Seconds 15
+
+# Run migration (connection string is handled automatically by DesignTimeDbContextFactory)
+dotnet ef database update --project Healthy\Healthy.Infrastructure\Healthy.Infrastructure.csproj --startup-project Healthy\Healthy.Api\Healthy.Api.csproj
+```
+
+**For CMD users:**
 ```cmd
 rem Start database container first
 docker-compose -f docker-compose.dev.yml up healthy-db -d
 
-rem Wait for database to be ready (10 seconds)
-timeout /t 10
+rem Wait for database to be ready (15 seconds)
+timeout /t 15
 
 rem Run migration (connection string is handled automatically by DesignTimeDbContextFactory)
 dotnet ef database update --project Healthy\Healthy.Infrastructure\Healthy.Infrastructure.csproj --startup-project Healthy\Healthy.Api\Healthy.Api.csproj
+```
+
+## 🚀 New Automated Scripts
+
+We've added automated scripts to make database management easier:
+
+### Features:
+- ✅ **Automatic Docker container management** - Starts database if not running
+- ✅ **Connection testing** - Waits for database to be ready before applying migrations  
+- ✅ **Error handling** - Stops on failures with clear error messages
+- ✅ **Status reporting** - Shows migration progress and final status
+- ✅ **Cross-platform** - PowerShell script works on Windows, macOS, and Linux
+- ✅ **Force restart option** - Can restart database container if needed
+
+### Usage Examples:
+```powershell
+# Basic usage
+.\scripts\update-database.ps1
+
+# With verbose output
+.\scripts\update-database.ps1 -Verbose
+
+# Force restart database container
+.\scripts\update-database.ps1 -Force
+
+# Windows CMD alternative
+.\update-database.bat
 ```
 
 ## Migration Management Commands
@@ -345,10 +401,21 @@ dotnet ef database update --project Healthy\Healthy.Infrastructure\Healthy.Infra
 ## Database Schema
 
 ### Current Tables
+Based on current migrations (as of August 5, 2025):
 - **Users**: User account information with BCrypt password hashing
-- **Roles**: System roles (Admin, User, Moderator)
-- **UserRoles**: User-Role relationships with soft delete support
+- **Roles**: System roles (Admin, User, Moderator)  
+- **UserRoles**: User-Role relationships
+- **BodyRecords**: Body measurement tracking
+- **Diaries**: User diary entries
+- **Exercises**: Exercise definitions and tracking
+- **Meals**: Meal planning and nutrition tracking
+- **Columns**: Custom column definitions for data organization
 - **__EFMigrationsHistory**: Migration tracking
+
+### Current Migrations
+1. **20250803102630_InitialEntitiesAndSeedData** - Initial database schema with core entities and seed data
+2. **20250803155957_RemoveIsDeletedColumn** - Removed soft delete columns from entities
+3. **20250804174116_UpdateSeedData** - Updated seed data with current values
 
 ### Seed Data (Included in Migrations)
 The following data is automatically seeded via Fluent API:
@@ -382,9 +449,9 @@ The factory automatically handles different environments:
 
 **Current Configuration**:
 - **Server**: localhost:1433 (for migrations)
-- **Database**: HealthyDB_Dev
+- **Database**: HealthyDB
 - **User**: sa
-- **Password**: Dev@Passw0rd123
+- **Password**: Dev@Passw0rd123!
 
 ### Migration Assembly
 - **Migrations Location**: `Healthy.Infrastructure` project
@@ -582,7 +649,7 @@ docker-compose -f docker-compose.dev.yml restart healthy-db
 #### Test Connection:
 ```cmd
 rem Connect to database container manually
-docker exec -it healthy-system-healthy-db-1 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Dev@Passw0rd123" -Q "SELECT 1"
+docker exec -it healthy-system-healthy-db-1 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Dev@Passw0rd123!" -Q "SELECT 1"
 ```
 
 ### 2. Migration Errors
@@ -787,11 +854,9 @@ healthy-system/
 │   ├── Factories/
 │   │   └── ApplicationDbContextFactory.cs  # Design-time DbContext factory
 │   ├── Migrations/                   # EF Core migrations
-│   │   ├── 20250802075047_InitialCreateWithSeedData.cs
-│   │   ├── 20250802090333_AddColumnEntity.cs
-│   │   ├── 20250802095835_AddMyRecordEntities.cs
-│   │   ├── 20250802191201_AddMealEntity.cs
-│   │   ├── 20250803083425_UpdateBaseEntitiesAndAuditFields.cs
+│   │   ├── 20250803102630_InitialEntitiesAndSeedData.cs
+│   │   ├── 20250803155957_RemoveIsDeletedColumn.cs  
+│   │   ├── 20250804174116_UpdateSeedData.cs
 │   │   └── ApplicationDbContextModelSnapshot.cs
 │   ├── Persistence/
 │   │   └── ApplicationDbContext.cs   # DbContext with Fluent API seeding
@@ -807,16 +872,16 @@ healthy-system/
 
 ### Connection String Details:
 - **Server**: localhost:1433 (for migrations from host)
-- **Database**: HealthyDB_Dev
+- **Database**: HealthyDB
 - **Username**: sa
-- **Password**: Dev@Passw0rd123
-- **Options**: TrustServerCertificate=true
+- **Password**: Dev@Passw0rd123!
+- **Options**: TrustServerCertificate=true, Encrypt=false
 
 ### Docker Container:
 - **Container Name**: healthy-system-healthy-db-1
 - **Image**: mcr.microsoft.com/mssql/server:2022-latest
 - **Port Mapping**: 1433:1433
-- **Volume**: healthy-db-dev-data
+- **Volume**: healthy-db-data
 
 ## Available Scripts
 
@@ -824,6 +889,15 @@ healthy-system/
 ```powershell
 # Run automated migration script
 .\scripts\update-database.ps1
+
+# With additional options
+.\scripts\update-database.ps1 -Force -Verbose
+```
+
+### Batch Script (Windows CMD):
+```cmd
+rem Run automated migration script
+.\update-database.bat
 ```
 
 ### Batch File:
@@ -834,3 +908,21 @@ rem Run batch file for migration
 
 ### Manual Commands:
 See sections above for detailed Package Manager Console and CMD commands.
+
+---
+
+## 📝 Changelog
+
+### August 5, 2025
+- ✅ **Added automated scripts**: Created `scripts/update-database.ps1` and `update-database.bat`
+- ✅ **Updated configuration**: Corrected database name from `HealthyDB_Dev` to `HealthyDB`
+- ✅ **Updated password**: Fixed password to match docker-compose configuration (`Dev@Passw0rd123!`)
+- ✅ **Updated migration list**: Reflected current migrations in project
+- ✅ **Enhanced documentation**: Added script features, better formatting, and cross-platform support
+- ✅ **Improved error handling**: Better troubleshooting section with current commands
+
+### Current Status
+- **Database**: HealthyDB (SQL Server 2022)
+- **Container**: healthy-system-healthy-db-1  
+- **Migrations**: 3 active migrations
+- **Automation**: Full PowerShell and CMD script support

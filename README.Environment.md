@@ -2,6 +2,9 @@
 
 This document explains how to configure the Healthy System using environment variables and `.env` files.
 
+**Current Version**: v1.2  
+**Environment Format**: ASP.NET Core Configuration
+
 ## Overview
 
 The application uses `.env` files for environment configuration instead of `appsettings.json`. This approach provides:
@@ -15,22 +18,81 @@ The application uses `.env` files for environment configuration instead of `apps
 
 ```
 healthy-system/
-├── .env                    # Base environment variables (gitignored)
-├── .env.example           # Template for environment variables (new format)
-├── .env.github            # GitHub Actions environment
-├── env.example            # Template for environment variables (legacy)
-├── env.development        # Development-specific variables
-├── docker-compose.dev.yml # Development Docker compose
-├── docker-compose.prod.yml# Production Docker compose
+├── .env                     # Base environment variables (gitignored)
+├── .env.example            # Template for environment variables (current format)
+├── .env.development        # Development-specific variables (current)
+├── .env.github             # GitHub Actions environment
+├── docker-compose.dev.yml  # Development Docker compose
+├── docker-compose.prod.yml # Production Docker compose
 └── Healthy/
     └── Healthy.Api/
-        └── Program.cs     # Loads .env files using DotNetEnv
+        └── Program.cs      # Loads .env files using DotNetEnv
 ```
+
+## Current Environment Files Status
+
+| File | Status | Purpose | Format |
+|------|--------|---------|---------|
+| `.env` | ❌ Not present | Base configuration | Key=Value |
+| `.env.example` | ✅ Available | Template for new setup | Key=Value |  
+| `.env.development` | ✅ Current active | Development settings | ASP.NET Config |
+| `.env.github` | ✅ Available | CI/CD pipeline | Key=Value |
 
 ## Environment Files
 
-### 1. `.env` (Base Configuration)
-Contains common variables for all environments. **This file is gitignored for security.**
+### 1. `.env.development` (Current Active Configuration)
+**Location**: `.env.development`  
+**Status**: ✅ Active  
+**Format**: ASP.NET Core Configuration  
+
+Contains development-specific variables with full ASP.NET Core configuration format:
+
+```bash
+# Application Settings
+ASPNETCORE_ENVIRONMENT=Development
+ASPNETCORE_URLS=http://+:8080
+DOTNET_USE_POLLING_FILE_WATCHER=true
+DOTNET_RUNNING_IN_CONTAINER=true
+
+# Database Settings (Current Configuration)
+ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
+
+# JWT Configuration
+JwtSettings__SecretKey=dev-super-secret-key-with-at-least-32-characters-for-development
+JwtSettings__Issuer=healthy-system-dev
+JwtSettings__Audience=healthy-system-api-dev
+JwtSettings__ExpirationInMinutes=1440
+JwtSettings__RefreshTokenExpirationInDays=7
+
+# Redis Settings
+ConnectionStrings__RedisConnection=healthy-redis:6379,password=DevRedis@Passw0rd123!
+REDIS_HOST=healthy-redis
+REDIS_PORT=6379
+REDIS_PASSWORD=DevRedis@Passw0rd123!
+
+# Logging Settings
+LOGGING_LEVEL=Debug
+SERILOG_MINIMUM_LEVEL=Debug
+
+# CORS Settings (Development)
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4200,http://localhost:8080,http://localhost:5001,https://localhost:3000,https://localhost:4200
+
+# Feature Flags
+ENABLE_SWAGGER=true
+ENABLE_DETAILED_ERRORS=true
+ENABLE_DEVELOPER_EXCEPTION_PAGE=true
+
+# Database Migration Settings
+AUTO_MIGRATE_DATABASE=true
+SEED_DATABASE=true
+```
+
+### 2. `.env.example` (Template Configuration)
+**Location**: `.env.example`  
+**Status**: ✅ Template  
+**Format**: Simple Key=Value  
+
+Template for basic environment setup:
 
 ```bash
 # Database Configuration
@@ -38,15 +100,9 @@ DB_PASSWORD=YourStrong@Passw0rd
 DB_NAME=HealthyDB
 DB_USER=sa
 
-# Application Configuration  
+# Application Configuration
 ASPNETCORE_ENVIRONMENT=Development
 ASPNETCORE_URLS=https://+:8081;http://+:8080
-
-# Redis Configuration
-REDIS_PASSWORD=
-
-# SSL Certificate (for HTTPS)
-CERT_PASSWORD=password
 
 # JWT Configuration
 JWT_SECRET_KEY=your-super-secret-key-with-at-least-32-characters
@@ -55,49 +111,33 @@ JWT_AUDIENCE=HealthySystemUsers
 JWT_EXPIRATION_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRATION_DAYS=7
 
-# API Keys
-API_KEY=your-api-key-here
-
-# External Services
-SMTP_HOST=
-SMTP_PORT=587
-SMTP_USERNAME=
-SMTP_PASSWORD=
-
 # Logging
 LOG_LEVEL=Information
 ```
 
-### 2. `env.development` (Development Configuration)
-Overrides base variables for development environment with more detailed settings.
+### 3. Docker Compose Configuration
+**Location**: `docker-compose.dev.yml`  
+**Status**: ✅ Active  
+**Format**: Docker Environment Variables  
 
-```bash
-# Development Environment Variables
-ASPNETCORE_ENVIRONMENT=Development
-ASPNETCORE_URLS=http://+:8080
-DOTNET_USE_POLLING_FILE_WATCHER=true
-DOTNET_RUNNING_IN_CONTAINER=true
+Current Docker configuration for development:
 
-# Database Settings (using connection string format)
-ConnectionStrings__DefaultConnection=Server=localhost,1433;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
+```yaml
+# API Service Environment
+environment:
+  - ASPNETCORE_ENVIRONMENT=Development
+  - ASPNETCORE_URLS=http://+:8080
+  - DOTNET_USE_POLLING_FILE_WATCHER=true
+  - DOTNET_RUNNING_IN_CONTAINER=true
+  - ConnectionStrings__DefaultConnection=Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
 
-# JWT Configuration (using JwtSettings format)
-JwtSettings__SecretKey=dev-super-secret-key-with-at-least-32-characters-for-development
-JwtSettings__Issuer=healthy-system-dev  
-JwtSettings__Audience=healthy-system-api-dev
-JwtSettings__ExpirationInMinutes=1440
-JwtSettings__RefreshTokenExpirationInDays=7
-
-# Redis Settings
-ConnectionStrings__RedisConnection=healthy-redis:6379
-
-# API Settings
-API_PORT=8080
-API_HOST=0.0.0.0
-
-# Logging
-LOG_LEVEL=Debug
-LOG_LEVEL_MICROSOFT=Information
+# Database Service Environment  
+healthy-db:
+  environment:
+    - SA_PASSWORD=Dev@Passw0rd123!
+    - ACCEPT_EULA=Y
+    - MSSQL_PID=Express
+```
 
 # CORS (Development - more permissive)
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:4200,http://localhost:8080,http://localhost:5001
@@ -122,51 +162,97 @@ COMPOSE_PROJECT_NAME=healthy-system-dev
 
 ## Setup Instructions
 
-### 1. Initial Setup
+### 🚀 Quick Start (Development)
+
+The project is **already configured** for development with `.env.development`. No additional setup needed for local development.
 
 ```bash
-# Copy the example file to create your .env (using new format)
-cp .env.example .env
+# 1. Start the development environment
+docker-compose -f docker-compose.dev.yml up -d
 
-# Or use legacy format if preferred
-cp env.example .env
+# 2. Run migrations (if needed)
+.\scripts\update-database.ps1
 
-# Edit the .env file with your specific values
-notepad .env  # Windows
-# or
-nano .env     # Linux/Mac
+# 3. Access the application
+# API: http://localhost:5001
+# Swagger: http://localhost:5001/swagger
 ```
 
-### 2. Environment Loading Logic
+### 🔧 Custom Configuration Setup
+
+If you need to customize the environment variables:
+
+```bash
+# Option 1: Copy the example file to create your .env
+cp .env.example .env
+
+# Option 2: Create a custom development file
+cp .env.development .env.development.local
+
+# Edit the file with your specific values
+notepad .env                    # Windows
+# or
+nano .env                       # Linux/Mac
+```
+
+### 🐳 Docker Environment Variables
+
+The Docker setup uses environment variables directly in `docker-compose.dev.yml`. No `.env` file loading required for containers.
+
+**Current Active Configuration:**
+- **Database**: HealthyDB  
+- **Server**: healthy-db (container) / localhost:1433 (host)
+- **Password**: Dev@Passw0rd123!
+- **API Port**: 5001 (host) → 8080 (container)
+
+### 🔄 Environment Loading Logic
 
 The application loads environment variables using DotNetEnv library in this order:
 
-1. **Automatic file selection**:
-   - If `ASPNETCORE_ENVIRONMENT=Development` → loads `env.development`
+1. **Docker Environment** (highest priority when running in container)
+2. **File selection logic**:
+   - If `ASPNETCORE_ENVIRONMENT=Development` → loads `.env.development`
    - Otherwise → loads `.env`
+3. **System Environment Variables** 
+4. **appsettings.json** (fallback)
 
-2. **File search locations**:
-   - Project root directory (../../ from API project)
-   - Current directory (fallback)
+### 📁 File Search Locations
 
-3. **Priority order**:
-   - **System Environment Variables** (highest priority)
-   - **Docker Environment Variables**
-   - **Loaded .env file variables**
-   - **appsettings.json** (fallback)
+### 📁 File Search Locations
+Environment files are searched in the following locations:
+- **Project root directory** (recommended): `d:\Phuong\Projects\healthy-system\`
+- **API project directory**: `Healthy\Healthy.Api\`
+- **Current working directory** (fallback)
 
-### 3. Docker Integration
+### 🐳 Docker Integration
 
-The `docker-compose.dev.yml` file automatically loads the `env.development` file:
+Docker containers get environment variables directly from `docker-compose.dev.yml` configuration. The containers do **not** load `.env` files.
+
+**Current Docker Environment Configuration:**
 
 ```yaml
-services:
-  healthy-api:
-    env_file:
-      - env.development
+# API Service
+healthy-api:
+  environment:
+    - ASPNETCORE_ENVIRONMENT=Development
+    - ASPNETCORE_URLS=http://+:8080
+    - ConnectionStrings__DefaultConnection=Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
+
+# Database Service
+healthy-db:
+  environment:
+    - SA_PASSWORD=Dev@Passw0rd123!
+    - ACCEPT_EULA=Y
+    - MSSQL_PID=Express
 ```
 
-## Environment Service Integration
+**Key Points:**
+- ✅ No `.env` file needed for Docker containers
+- ✅ Database password consistent across services
+- ✅ Connection string uses container service names
+- ✅ Host development can use `.env.development` for different settings
+
+## 🔧 Environment Service Integration
 
 The application uses ASP.NET Core's built-in configuration system combined with DotNetEnv for environment variable loading. Configuration is accessed through `IConfiguration`:
 
@@ -217,51 +303,119 @@ public class AuthService
 }
 ```
 
+## 📊 Current Active Configuration (August 5, 2025)
+
+### Development Environment Status
+| Component | Status | Configuration Source | Value/Connection |
+|-----------|--------|---------------------|------------------|
+| **API** | ✅ Active | docker-compose.dev.yml | http://localhost:5001 |
+| **Database** | ✅ Active | docker-compose.dev.yml | localhost:1433 (HealthyDB) |
+| **Swagger** | ✅ Enabled | .env.development | http://localhost:5001/swagger |
+| **Hot Reload** | ✅ Enabled | docker-compose.dev.yml | dotnet watch |
+| **Environment Files** | ✅ Active | .env.development | ASP.NET Core format |
+
+### Key Configuration Values
+```bash
+# Database (Current Active)
+Database Name: HealthyDB
+Server: healthy-db (container) / localhost:1433 (host)
+Password: Dev@Passw0rd123!
+User: sa
+
+# API
+Port: 5001 (host) → 8080 (container)
+Environment: Development
+Swagger: Enabled at /swagger
+Hot Reload: Enabled
+
+# Security
+JWT Secret: dev-super-secret-key-with-at-least-32-characters-for-development
+JWT Expiration: 24 hours (1440 minutes)
+CORS: Localhost origins enabled
+
+# Features
+Auto Migration: Enabled
+Database Seeding: Enabled
+Detailed Errors: Enabled
+```
+
+### 🔧 Quick Troubleshooting
+
+#### Issue: Environment variables not loading
+```bash
+# Check if .env.development exists
+ls -la .env.development
+
+# Verify docker-compose environment section
+docker-compose -f docker-compose.dev.yml config
+```
+
+#### Issue: Database connection failed
+```bash
+# Check if database container is running
+docker ps | findstr healthy-db
+
+# Test database connection
+docker exec healthy-system-healthy-db-1 /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Dev@Passw0rd123!" -Q "SELECT 1"
+```
+
+#### Issue: Wrong configuration being loaded
+```bash
+# Check which environment is active
+echo $ASPNETCORE_ENVIRONMENT
+
+# For containers, check environment variables
+docker exec healthy-system-healthy-api-1 env | grep ASPNETCORE
+```
+
 ## Configuration Categories
 
 ### 1. Database Configuration
 
-| Variable | Description | Example | Used In |
-|----------|-------------|---------|---------|
-| `DB_PASSWORD` | SQL Server password | `YourStrong@Passw0rd` | `.env` |
-| `DB_NAME` | Database name | `HealthyDB` | `.env` |
-| `DB_USER` | Database username | `sa` | `.env` |
-| `ConnectionStrings__DefaultConnection` | Full connection string | `Server=localhost,1433;Database=HealthyDB_Dev;...` | `env.development` |
+| Variable | Description | Current Value | Used In |
+|----------|-------------|---------------|---------|
+| `ConnectionStrings__DefaultConnection` | Full connection string | `Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false` | docker-compose.dev.yml |
+| `SA_PASSWORD` | SQL Server SA password | `Dev@Passw0rd123!` | docker-compose.dev.yml (DB service) |
+| `DB_PASSWORD` | Database password (template) | `YourStrong@Passw0rd` | .env.example |
+| `DB_NAME` | Database name (template) | `HealthyDB` | .env.example |
 
 ### 2. JWT Configuration
 
-| Variable | Description | Example | Used In |
-|----------|-------------|---------|---------|
-| `JWT_SECRET_KEY` | JWT signing secret | `your-super-secret-key-with-at-least-32-characters` | `.env` |
-| `JWT_ISSUER` | JWT issuer | `HealthySystem` | `.env` |
-| `JWT_AUDIENCE` | JWT audience | `HealthySystemUsers` | `.env` |
-| `JWT_EXPIRATION_MINUTES` | Token expiry time | `60` | `.env` |
-| `JwtSettings__SecretKey` | JWT secret (settings format) | `dev-super-secret-key-...` | `env.development` |
-| `JwtSettings__Issuer` | JWT issuer (settings format) | `healthy-system-dev` | `env.development` |
+| Variable | Current Value | Used In | Purpose |
+|----------|---------------|---------|---------|
+| `JwtSettings__SecretKey` | `dev-super-secret-key-with-at-least-32-characters-for-development` | .env.development | JWT signing |
+| `JwtSettings__Issuer` | `healthy-system-dev` | .env.development | Token issuer |
+| `JwtSettings__Audience` | `healthy-system-api-dev` | .env.development | Token audience |
+| `JwtSettings__ExpirationInMinutes` | `1440` (24 hours) | .env.development | Token expiry |
+| `JwtSettings__RefreshTokenExpirationInDays` | `7` | .env.development | Refresh token expiry |
 
 ### 3. Application Configuration
 
-| Variable | Description | Example | Used In |
-|----------|-------------|---------|---------|
-| `ASPNETCORE_ENVIRONMENT` | ASP.NET Core environment | `Development` | Both |
-| `ASPNETCORE_URLS` | Application URLs | `https://+:8081;http://+:8080` | Both |
-| `API_PORT` | API port | `8080` | `env.development` |
-| `API_HOST` | API host | `0.0.0.0` | `env.development` |
+| Variable | Current Value | Used In | Purpose |
+|----------|---------------|---------|---------|
+| `ASPNETCORE_ENVIRONMENT` | `Development` | Both docker-compose & .env.development | Environment mode |
+| `ASPNETCORE_URLS` | `http://+:8080` | docker-compose.dev.yml | Container binding |
+| `DOTNET_USE_POLLING_FILE_WATCHER` | `true` | Both | Hot reload support |
+| `DOTNET_RUNNING_IN_CONTAINER` | `true` | Both | Container detection |
 
-### 4. Redis Configuration
+### 4. Redis Configuration (Optional)
 
-| Variable | Description | Example | Used In |
-|----------|-------------|---------|---------|
-| `REDIS_PASSWORD` | Redis password | `` | `.env` |
-| `ConnectionStrings__RedisConnection` | Redis connection string | `healthy-redis:6379` | `env.development` |
+| Variable | Current Value | Used In | Purpose |
+|----------|---------------|---------|---------|
+| `ConnectionStrings__RedisConnection` | `healthy-redis:6379,password=DevRedis@Passw0rd123!` | .env.development | Cache connection |
+| `REDIS_HOST` | `healthy-redis` | .env.development | Redis server |
+| `REDIS_PORT` | `6379` | .env.development | Redis port |
+| `REDIS_PASSWORD` | `DevRedis@Passw0rd123!` | .env.development | Redis password |
 
 ### 5. Development Features
 
-| Variable | Description | Default | Used In |
-|----------|-------------|---------|---------|
-| `ENABLE_SWAGGER` | Enable Swagger UI | `true` | `env.development` |
-| `ENABLE_DETAILED_ERRORS` | Detailed error pages | `true` | `env.development` |
-| `ENABLE_DEVELOPER_EXCEPTION_PAGE` | Developer exception page | `true` | `env.development` |
+| Variable | Current Value | Used In | Purpose |
+|----------|---------------|---------|---------|
+| `ENABLE_SWAGGER` | `true` | .env.development | Swagger UI |
+| `ENABLE_DETAILED_ERRORS` | `true` | .env.development | Error details |
+| `ENABLE_DEVELOPER_EXCEPTION_PAGE` | `true` | .env.development | Exception page |
+| `AUTO_MIGRATE_DATABASE` | `true` | .env.development | Auto migrations |
+| `SEED_DATABASE` | `true` | .env.development | Seed data |
 | `AUTO_MIGRATE_DATABASE` | Auto run migrations | `true` | `env.development` |
 | `SEED_DATABASE` | Seed sample data | `true` | `env.development` |
 
@@ -497,4 +651,24 @@ echo "DB_PASSWORD=NewPassword" >> .env        # Add/update variables
 - [ ] CORS origins are properly configured
 - [ ] HTTPS is enabled in production
 - [ ] Environment variables are validated on startup
-- [ ] Secrets are rotated regularly 
+- [ ] Secrets are rotated regularly
+
+---
+
+## 📝 Changelog
+
+### August 5, 2025
+- ✅ **Updated configuration documentation**: Reflected current active configuration
+- ✅ **Corrected database settings**: Updated from `HealthyDB_Dev` to `HealthyDB`
+- ✅ **Fixed password references**: Updated to match docker-compose (`Dev@Passw0rd123!`)
+- ✅ **Added current status section**: Live configuration values and troubleshooting
+- ✅ **Updated file structure**: Reflected actual files in project
+- ✅ **Enhanced setup instructions**: Added quick start for immediate development
+- ✅ **Improved Docker integration**: Clarified container vs host configuration
+
+### Current Status
+- **Active Environment**: Development with Docker
+- **Configuration Format**: ASP.NET Core Configuration (double underscore format)
+- **Primary Config File**: `.env.development`
+- **Docker Integration**: Direct environment variables in docker-compose.dev.yml
+- **Database**: HealthyDB on SQL Server 2022 Express 
