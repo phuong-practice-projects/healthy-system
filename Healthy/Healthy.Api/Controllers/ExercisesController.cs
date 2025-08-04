@@ -1,16 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Healthy.Application.UseCases.Exercises.Commands.DeleteExercise;
-using Healthy.Application.UseCases.Exercises.Queries.GetExercises;
-using Healthy.Application.UseCases.Exercises.Queries.GetExercise;
-using Healthy.Application.UseCases.Exercises.Commands.UpdateExercise;
 using Healthy.Application.UseCases.Exercises.Commands.CreateExercise;
+using Healthy.Application.UseCases.Exercises.Commands.DeleteExercise;
+using Healthy.Application.UseCases.Exercises.Commands.UpdateExercise;
+using Healthy.Application.UseCases.Exercises.Queries.GetExercise;
+using Healthy.Application.UseCases.Exercises.Queries.GetExercises;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[UserOrAdmin]
 public class ExercisesController(IMediator mediator) : BaseController
 {
 

@@ -33,27 +33,41 @@ public class UserAuthorizationMiddleware
         try
         {
             // Extract token from Authorization header
-            var token = context.Request.Headers["Authorization"].FirstOrDefault();
+            var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();
 
-            if (!string.IsNullOrEmpty(token))
+            if (!string.IsNullOrEmpty(authHeader))
             {
-                _logger.LogInformation("🔑 UserAuthorizationMiddleware: Found JWT token, validating...");
-                
-                var claimsPrincipal = ValidateAndExtractClaims(token);
-                if (claimsPrincipal != null)
+                // Remove "Bearer " prefix if present
+                var token = authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase) 
+                    ? authHeader.Substring("Bearer ".Length).Trim() 
+                    : authHeader.Trim();
+
+                // Validate token format before processing
+                if (!string.IsNullOrEmpty(token) && IsValidJwtFormat(token))
                 {
-                    // Set user identity for the request
-                    context.User = claimsPrincipal;
+                    _logger.LogInformation("🔑 UserAuthorizationMiddleware: Found valid JWT token format, validating...");
                     
-                    // Add user information to HttpContext.Items for easy access
-                    PopulateUserContext(context, claimsPrincipal);
-                    
-                    _logger.LogInformation("✅ User authenticated successfully: {UserId}", 
-                        claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                    var claimsPrincipal = ValidateAndExtractClaims(token);
+                    if (claimsPrincipal != null)
+                    {
+                        // Set user identity for the request
+                        context.User = claimsPrincipal;
+                        
+                        // Add user information to HttpContext.Items for easy access
+                        PopulateUserContext(context, claimsPrincipal);
+                        
+                        _logger.LogInformation("✅ User authenticated successfully: {UserId}", 
+                            claimsPrincipal.FindFirst(ClaimTypes.NameIdentifier)?.Value);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("❌ Invalid or expired JWT token");
+                    }
                 }
                 else
                 {
-                    _logger.LogWarning("❌ Invalid or expired JWT token");
+                    _logger.LogWarning("❌ Invalid JWT token format. Token: {TokenPreview}", 
+                        token?.Length > 20 ? token.Substring(0, 20) + "..." : token);
                 }
             }
             else
@@ -70,12 +84,39 @@ public class UserAuthorizationMiddleware
         await _next(context);
     }
 
+    /// <summary>
+    /// Validates if the token has the correct JWT format (3 segments separated by dots)
+    /// </summary>
+    private bool IsValidJwtFormat(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token))
+            return false;
+            
+        var segments = token.Split('.');
+        return segments.Length == 3 && segments.All(segment => !string.IsNullOrWhiteSpace(segment));
+    }
+
 
     private ClaimsPrincipal? ValidateAndExtractClaims(string token)
     {
         try
         {
+            // Additional format validation
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                _logger.LogWarning("Empty or null JWT token provided");
+                return null;
+            }
+
             var tokenHandler = new JwtSecurityTokenHandler();
+            
+            // Check if the token can be read before validation
+            if (!tokenHandler.CanReadToken(token))
+            {
+                _logger.LogWarning("JWT token is not in a valid format or cannot be read");
+                return null;
+            }
+
             var key = Encoding.ASCII.GetBytes(_jwtSettings.SecretKey);
 
             var validationParameters = new TokenValidationParameters
@@ -100,6 +141,12 @@ public class UserAuthorizationMiddleware
                 return principal;
             }
 
+            return null;
+        }
+        catch (SecurityTokenMalformedException ex)
+        {
+            _logger.LogWarning("JWT token has malformed structure: {Error}. Token preview: {TokenPreview}", 
+                ex.Message, token?.Length > 20 ? token.Substring(0, 20) + "..." : token);
             return null;
         }
         catch (SecurityTokenExpiredException)

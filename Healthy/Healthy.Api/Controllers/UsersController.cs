@@ -1,17 +1,20 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Healthy.Application.UseCases.Users.Queries.GetUsers;
-using Healthy.Application.UseCases.Users.Queries.GetUser;
-using Healthy.Application.UseCases.Users.Queries.GetUsersWithFilters;
 using Healthy.Application.UseCases.Users.Commands.DeleteUser;
 using Healthy.Application.UseCases.Users.Commands.UpdateUser;
+using Healthy.Application.UseCases.Users.Queries.GetUser;
+using Healthy.Application.UseCases.Users.Queries.GetUsers;
+using Healthy.Application.UseCases.Users.Queries.GetUsersWithFilters;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[AdminOnly]
+
 public class UsersController(IMediator mediator) : BaseController
 {
 
@@ -95,6 +98,7 @@ public class UsersController(IMediator mediator) : BaseController
     /// <param name="request">Updated user data</param>
     /// <returns>Update result</returns>
     [HttpPut("me")]
+    [Authorize(Roles = "User,Admin")]
     [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Result<bool>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -198,6 +202,7 @@ public class UsersController(IMediator mediator) : BaseController
     /// </summary>
     /// <returns>Current user information</returns>
     [HttpGet("me")]
+    [Authorize(Roles = "User,Admin")]
     [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public ActionResult<UserDto> GetCurrentUser()

@@ -1,17 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Swashbuckle.AspNetCore.Annotations;
-using Healthy.Application.UseCases.Meals.Queries.GetMeals;
 using Healthy.Application.UseCases.Meals.Commands.CreateMeal;
-using Healthy.Application.UseCases.Meals.Commands.UpdateMeal;
 using Healthy.Application.UseCases.Meals.Commands.DeleteMeal;
+using Healthy.Application.UseCases.Meals.Commands.UpdateMeal;
+using Healthy.Application.UseCases.Meals.Queries.GetMeals;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-// [Authorize]
+[UserOrAdmin]
 [SwaggerTag("Meal management endpoints for CRUD operations")]
 public class MealsController(IMediator mediator) : BaseController
 {

@@ -1,16 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Healthy.Application.UseCases.Diaries.Queries.GetDiaries;
-using Healthy.Application.UseCases.Diaries.Queries.GetDiary;
 using Healthy.Application.UseCases.Diaries.Commands.CreateDiary;
 using Healthy.Application.UseCases.Diaries.Commands.DeleteDiary;
 using Healthy.Application.UseCases.Diaries.Commands.UpdateDiary;
+using Healthy.Application.UseCases.Diaries.Queries.GetDiaries;
+using Healthy.Application.UseCases.Diaries.Queries.GetDiary;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[UserOrAdmin]
 public class DiariesController(IMediator mediator) : BaseController
 {
 

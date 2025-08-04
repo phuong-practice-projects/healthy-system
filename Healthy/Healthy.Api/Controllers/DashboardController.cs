@@ -1,11 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Swashbuckle.AspNetCore.Annotations;
-using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardSummary;
-using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardAchievement;
-using Healthy.Application.UseCases.Meals.Queries.GetMealHistory;
 using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecordGraph;
+using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardAchievement;
+using Healthy.Application.UseCases.Dashboard.Queries.GetDashboardSummary;
+using Healthy.Application.UseCases.Meals.Queries.GetMealHistory;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Healthy.Api.Controllers;
 
@@ -15,7 +17,7 @@ namespace Healthy.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/dashboard")]
-// [Authorize]
+[UserOrAdmin]
 [SwaggerTag("Enterprise-grade dashboard with both micro-APIs and aggregated endpoints for optimal performance")]
 public class DashboardController(IMediator mediator) : BaseController
 {
@@ -27,8 +29,9 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <param name="type">Optional meal type filter for targeted loading</param>
     /// <returns>Lightweight meal data for immediate display</returns>
     [HttpGet("meals-today")]
+    [Authorize(Roles = "User,Admin")]
     [SwaggerOperation(
-        Summary = "Get today's meals (Micro-API)",
+        Summary = "Get today's meals",
         Description = "Fast-loading endpoint for today's meal data with statistics. Optimized for immediate UI rendering and progressive loading.",
         OperationId = "GetTodayMeals",
         Tags = new[] { "Dashboard" }
@@ -60,8 +63,9 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <param name="date">Optional date for historical data (default: today)</param>
     /// <returns>Goal completion percentages</returns>
     [HttpGet("achievements")]
+    [Authorize(Roles = "User,Admin")]
     [SwaggerOperation(
-        Summary = "Get achievement rates (Micro-API)",
+        Summary = "Get achievement rates",
         Description = "Lightweight endpoint for goal completion tracking. Perfect for progress indicators and charts.",
         OperationId = "GetAchievements",
         Tags = new[] { "Dashboard" }
@@ -93,7 +97,7 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <returns>User engagement and streak data</returns>
     [HttpGet("summary")]
     [SwaggerOperation(
-        Summary = "Get user summary (Micro-API)",
+        Summary = "Get user summary",
         Description = "Essential user statistics including streaks and activity trends. Optimized for dashboard header display.",
         OperationId = "GetUserSummary",
         Tags = new[] { "Dashboard" }
@@ -125,7 +129,7 @@ public class DashboardController(IMediator mediator) : BaseController
     /// <returns>Chart data for weight visualization</returns>
     [HttpGet("weight-chart")]
     [SwaggerOperation(
-        Summary = "Get weight chart data (Micro-API)",
+        Summary = "Get weight chart data",
         Description = "Optimized chart data for weight trend visualization. Configurable time range for performance tuning.",
         OperationId = "GetWeightChart",
         Tags = new[] { "Dashboard" }

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using MediatR;
 using Healthy.Application.Common.Models;
 using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecords;
@@ -7,11 +8,13 @@ using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecordGraph;
 using Healthy.Application.UseCases.BodyRecords.Queries.GetBodyRecord;
 using Healthy.Application.UseCases.BodyRecords.Commands.CreateBodyRecord;
 using Healthy.Application.UseCases.BodyRecords.Commands.UpdateBodyRecord;
+using Healthy.Infrastructure.Authorization;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/records")]
+[UserOrAdmin]
 public class BodyRecordsController(IMediator mediator) : BaseController
 {
 

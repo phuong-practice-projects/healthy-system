@@ -1,17 +1,19 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using MediatR;
 using Healthy.Application.Common.Models;
-using Healthy.Application.UseCases.Columns.Queries.GetColumn;
-using Healthy.Application.UseCases.Columns.Commands.DeleteColumn;
 using Healthy.Application.UseCases.Columns.Commands.CreateColumn;
-using Healthy.Application.UseCases.Columns.Queries.GetColumns;
+using Healthy.Application.UseCases.Columns.Commands.DeleteColumn;
 using Healthy.Application.UseCases.Columns.Commands.UpdateColumn;
+using Healthy.Application.UseCases.Columns.Queries.GetColumn;
+using Healthy.Application.UseCases.Columns.Queries.GetColumns;
+using Healthy.Infrastructure.Authorization;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Healthy.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[UserOrAdmin]
 public class ColumnsController(IMediator mediator) : BaseController
 {
 
