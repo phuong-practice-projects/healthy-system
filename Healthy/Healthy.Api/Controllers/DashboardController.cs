@@ -23,7 +23,7 @@ public class DashboardController(IMediator mediator) : BaseController
     #region Micro-APIs for Optimal Performance  
 
     /// <summary>
-    /// [MICRO-API] Get today's meal summary - Optimized for quick loading
+    /// Get today's meal summary - Optimized for quick loading
     /// </summary>
     /// <param name="type">Optional meal type filter for targeted loading</param>
     /// <returns>Lightweight meal data for immediate display</returns>
@@ -47,7 +47,8 @@ public class DashboardController(IMediator mediator) : BaseController
         var query = new GetMealHistoryQuery
         {
             UserId = userId,
-            Date = DateTime.Today
+            Date = DateTime.Today,
+            Type = type  // Add the type filter parameter
         };
 
         var result = await mediator.Send(query);
@@ -56,7 +57,7 @@ public class DashboardController(IMediator mediator) : BaseController
     }
 
     /// <summary>
-    /// [MICRO-API] Get achievement completion rates - Fast goal tracking
+    /// Get achievement completion rates - Fast goal tracking
     /// </summary>
     /// <param name="date">Optional date for historical data (default: today)</param>
     /// <returns>Goal completion percentages</returns>
@@ -89,7 +90,7 @@ public class DashboardController(IMediator mediator) : BaseController
     }
 
     /// <summary>
-    /// [MICRO-API] Get user activity summary - Quick stats overview
+    /// Get user activity summary - Quick stats overview
     /// </summary>
     /// <returns>User engagement and streak data</returns>
     [HttpGet("summary")]
@@ -120,7 +121,7 @@ public class DashboardController(IMediator mediator) : BaseController
     }
 
     /// <summary>
-    /// [MICRO-API] Get weight trend chart data - Optimized graphs
+    /// Get weight trend chart data - Optimized graphs
     /// </summary>
     /// <param name="months">Number of months to include (default: 3, max: 12)</param>
     /// <returns>Chart data for weight visualization</returns>

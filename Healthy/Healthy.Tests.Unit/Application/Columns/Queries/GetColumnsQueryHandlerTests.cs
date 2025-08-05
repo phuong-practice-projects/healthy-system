@@ -42,7 +42,7 @@ public class GetColumnsQueryHandlerTests : IDisposable
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().HaveCount(3); // Only active and non-deleted columns
+        result.Items.Should().HaveCount(3); // Only active and non-deleted columns (Fish Diet, Healthy Diet Recipes, Beauty)
         result.PageNumber.Should().Be(1);
         result.TotalCount.Should().Be(3);
         result.TotalPages.Should().Be(1);
@@ -59,7 +59,7 @@ public class GetColumnsQueryHandlerTests : IDisposable
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().HaveCount(1); // Only 1 active diet column (not deleted)
+        result.Items.Should().HaveCount(1); // Only 1 active diet column (Fish Diet Benefits - the Immune System Boost is soft deleted)
         result.Items.First().Tags.Should().Contain("#魚料理");
         result.TotalCount.Should().Be(1);
     }
@@ -200,7 +200,7 @@ public class GetColumnsQueryHandlerTests : IDisposable
 
         // Assert
         result.Should().NotBeNull();
-        result.Items.Should().HaveCount(1);
+        result.Items.Should().HaveCount(1); // Only Fish Diet Benefits should be returned (Immune System Boost is soft deleted)
 
         var column = result.Items.First();
         column.Tags.Should().NotBeNullOrEmpty();

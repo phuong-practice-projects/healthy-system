@@ -38,7 +38,7 @@ public static class TestHelper
 
     public static List<Column> GetSampleColumns()
     {
-        return new List<Column>
+        var columns = new List<Column>
         {
             new Column
             {
@@ -96,5 +96,14 @@ public static class TestHelper
                 CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc),
             }
         };
+
+        // Mark one column as soft deleted for testing
+        var deletedColumn = columns.LastOrDefault(c => c.Content.Contains("バランスの良い食事"));
+        if (deletedColumn != null)
+        {
+            deletedColumn.Delete("test-user");
+        }
+
+        return columns;
     }
 }

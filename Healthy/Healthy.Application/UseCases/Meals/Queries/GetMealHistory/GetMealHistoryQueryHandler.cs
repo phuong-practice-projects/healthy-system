@@ -31,7 +31,7 @@ public class GetMealHistoryQueryHandler : IRequestHandler<GetMealHistoryQuery, M
             request.UserId, targetDate, request.Type ?? "None");
 
         var query = _context.Meals
-            .Where(m => m.UserId.ToString().ToLower() == request.UserId.ToString().ToLower() && m.Date.Date == targetDate);
+            .Where(m => m.UserId == request.UserId && m.Date.Date == targetDate);
 
         // Apply type filter if specified (for dashboard filter buttons)
         if (!string.IsNullOrEmpty(request.Type))
@@ -40,6 +40,10 @@ public class GetMealHistoryQueryHandler : IRequestHandler<GetMealHistoryQuery, M
         }
 
         var meals = await query
+            .ToListAsync(cancellationToken); // First get the data from database
+        
+        // Then apply ordering in memory
+        var orderedMeals = meals
             .OrderBy(m => GetMealTypeOrder(m.Type)) // Order by meal time: Morning -> Lunch -> Dinner -> Snack
             .ThenByDescending(m => m.CreatedAt)
             .Select(m => new MealDto
@@ -52,17 +56,17 @@ public class GetMealHistoryQueryHandler : IRequestHandler<GetMealHistoryQuery, M
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt
             })
-            .ToListAsync(cancellationToken);
+            .ToList();
 
         // Calculate comprehensive statistics
         var statistics = await CalculateMealStatistics(request.UserId, targetDate, cancellationToken);
 
         _logger.LogInformation("Retrieved {Count} meals with {Stats} statistics", 
-            meals.Count, $"{statistics.TotalMeals} total, {statistics.CompletionPercentage}% completion");
+            orderedMeals.Count, $"{statistics.TotalMeals} total, {statistics.CompletionPercentage}% completion");
 
         return new MealHistoryResponse
         {
-            Meals = meals,
+            Meals = orderedMeals,
             Statistics = statistics
         };
     }

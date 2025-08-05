@@ -29,8 +29,11 @@ if (builder.Environment.EnvironmentName != "Testing")
 // Add HttpContextAccessor for CurrentUserService
 builder.Services.AddHttpContextAccessor();
 
-// Add custom Authentication and Authorization
-builder.Services.AddCustomAuthentication();
+// Add custom Authentication and Authorization (skip in test environment)
+if (builder.Environment.EnvironmentName != "Testing")
+{
+    builder.Services.AddCustomAuthentication();
+}
 
 var app = builder.Build();
 

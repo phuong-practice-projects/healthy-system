@@ -17,7 +17,7 @@ public class GetMealsQueryHandler : IRequestHandler<GetMealsQuery, MealListRespo
     public async Task<MealListResponse> Handle(GetMealsQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Meals
-            .Where(m => m.UserId.ToString().ToLower() == request.UserId.ToString().ToLower());
+            .Where(m => m.UserId == request.UserId);
 
         // Apply date range filter
         if (request.StartDate.HasValue)
