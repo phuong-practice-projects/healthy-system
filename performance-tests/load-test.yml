@@ -1,0 +1,81 @@
+config:
+  target: 'http://localhost:5001'
+  phases:
+    - duration: 60
+      arrivalRate: 10
+      name: "Warm up"
+    - duration: 120
+      arrivalRate: 50
+      name: "Load test"
+    - duration: 60
+      arrivalRate: 100
+      name: "Stress test"
+  processor: "./load-test-functions.js"
+
+scenarios:
+  - name: "Health Check"
+    weight: 20
+    flow:
+      - get:
+          url: "/health"
+          expect:
+            - statusCode: 200
+
+  - name: "Get Users"
+    weight: 30
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "admin@healthysystem.com"
+            password: "Admin@123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+      - get:
+          url: "/api/users"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200
+
+  - name: "Create Body Record"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "user@healthysystem.com"
+            password: "User@123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+      - post:
+          url: "/api/bodyrecords"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          json:
+            weight: "{{ $randomFloat(50, 100) }}"
+            bodyFatPercentage: "{{ $randomFloat(10, 30) }}"
+            recordDate: "{{ $now() }}"
+            notes: "Performance test record"
+          expect:
+            - statusCode: 201
+
+  - name: "Get Dashboard Data"
+    weight: 25
+    flow:
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "user@healthysystem.com"
+            password: "User@123"
+          capture:
+            - json: "$.token"
+              as: "authToken"
+      - get:
+          url: "/api/dashboard"
+          headers:
+            Authorization: "Bearer {{ authToken }}"
+          expect:
+            - statusCode: 200

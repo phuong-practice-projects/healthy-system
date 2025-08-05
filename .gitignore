@@ -586,8 +586,9 @@ packages/
 *.sqlite3
 *.mdb
 
-# Entity Framework
-Migrations/
+# Entity Framework - Keep migrations in source control
+# Migrations/  # COMMENTED OUT - Migrations should be tracked
+MigrationBackup/  # Only ignore backup folder
 
 # Docker volumes and networks
 docker-compose.override.yml

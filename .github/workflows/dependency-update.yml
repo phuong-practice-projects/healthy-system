@@ -1,0 +1,277 @@
+name: 📦 Dependency Updates
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+    inputs:
+      update_type:
+        description: 'Type of updates to perform'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - all
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  SOLUTION_PATH: './Healthy/Healthy.sln'
+
+jobs:
+  check-updates:
+    name: 🔍 Check for Updates
+    runs-on: ubuntu-latest
+    outputs:
+      has-updates: ${{ steps.check.outputs.has-updates }}
+      updates-summary: ${{ steps.check.outputs.updates-summary }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Install dotnet outdated tool
+      run: dotnet tool install --global dotnet-outdated-tool
+
+    - name: 🔍 Check for outdated packages
+      id: check
+      run: |
+        echo "🔍 Checking for outdated packages..."
+        
+        # Check for outdated packages
+        if dotnet outdated ${{ env.SOLUTION_PATH }} --output json > outdated.json 2>/dev/null; then
+          if [ -s outdated.json ] && [ "$(cat outdated.json)" != "[]" ]; then
+            echo "has-updates=true" >> $GITHUB_OUTPUT
+            
+            # Create a summary of updates
+            SUMMARY=$(cat outdated.json | jq -r '.[] | select(.outdated == true) | "- \(.name): \(.current) → \(.latest)"' | head -20)
+            if [ -n "$SUMMARY" ]; then
+              echo "updates-summary<<EOF" >> $GITHUB_OUTPUT
+              echo "$SUMMARY" >> $GITHUB_OUTPUT
+              echo "EOF" >> $GITHUB_OUTPUT
+            else
+              echo "has-updates=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "has-updates=false" >> $GITHUB_OUTPUT
+            echo "✅ All packages are up to date!"
+          fi
+        else
+          echo "has-updates=false" >> $GITHUB_OUTPUT
+          echo "⚠️ Could not check for updates"
+        fi
+
+    - name: 📤 Upload outdated packages report
+      uses: actions/upload-artifact@v4
+      if: steps.check.outputs.has-updates == 'true'
+      with:
+        name: outdated-packages
+        path: outdated.json
+        retention-days: 7
+
+  update-dependencies:
+    name: 🔄 Update Dependencies
+    runs-on: ubuntu-latest
+    needs: check-updates
+    if: needs.check-updates.outputs.has-updates == 'true'
+    
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: ⚙️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 📦 Install dotnet outdated tool
+      run: dotnet tool install --global dotnet-outdated-tool
+
+    - name: 🔄 Update packages
+      run: |
+        echo "🔄 Updating packages..."
+        
+        UPDATE_TYPE="${{ github.event.inputs.update_type || 'minor' }}"
+        
+        case $UPDATE_TYPE in
+          "patch")
+            dotnet outdated ${{ env.SOLUTION_PATH }} --upgrade --version-lock Major
+            ;;
+          "minor")
+            dotnet outdated ${{ env.SOLUTION_PATH }} --upgrade --version-lock Minor
+            ;;
+          "major")
+            dotnet outdated ${{ env.SOLUTION_PATH }} --upgrade
+            ;;
+          "all")
+            dotnet outdated ${{ env.SOLUTION_PATH }} --upgrade
+            ;;
+        esac
+
+    - name: 🏗️ Build and test with updates
+      run: |
+        echo "🏗️ Building project with updated dependencies..."
+        dotnet restore ${{ env.SOLUTION_PATH }}
+        dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+        
+        echo "🧪 Running tests with updated dependencies..."
+        dotnet test ${{ env.SOLUTION_PATH }} --configuration Release --no-build --logger trx --results-directory ./TestResults
+
+    - name: 🔍 Check for security vulnerabilities
+      run: |
+        echo "🔍 Checking for security vulnerabilities..."
+        dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive
+
+    - name: 📝 Generate update summary
+      id: summary
+      run: |
+        echo "📝 Generating update summary..."
+        
+        # Get the changes made
+        if git diff --quiet; then
+          echo "No changes were made"
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+        else
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+          
+          # Get list of changed files
+          CHANGED_FILES=$(git diff --name-only | grep -E '\.(csproj|props|targets)$' | head -10)
+          echo "changed-files<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        fi
+
+    - name: 🚀 Create Pull Request
+      if: steps.summary.outputs.has-changes == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        commit-message: "📦 Update dependencies - ${{ github.event.inputs.update_type || 'minor' }} updates"
+        title: "� Automated Dependency Update - ${{ github.event.inputs.update_type || 'minor' }} updates"
+        body: |
+          ## � Automated Dependency Update
+          
+          This PR contains automated dependency updates for the Healthy System project.
+          
+          ### 🔄 Update Type: ${{ github.event.inputs.update_type || 'minor' }}
+          
+          ### 📋 Updated Packages
+          ${{ needs.check-updates.outputs.updates-summary }}
+          
+          ### 🔍 Changed Files
+          ${{ steps.summary.outputs.changed-files }}
+          
+          ### ✅ Verification
+          - [x] Build successful
+          - [x] Tests passing
+          - [x] Security vulnerabilities checked
+          
+          ### 🤖 Automated Actions
+          This PR was created automatically by the dependency update workflow.
+          Please review the changes and merge if everything looks good.
+          
+          ### 📚 Documentation
+          - [Setup Guide](./README.SETUP.md)
+          - [Project Documentation](./README.md)
+        branch: dependencies/automated-update-${{ github.run_number }}
+        delete-branch: true
+        labels: |
+          dependencies
+          automated
+          enhancement
+
+  security-audit:
+    name: 🛡️ Security Audit
+    runs-on: ubuntu-latest
+    if: always()
+    
+    permissions:
+      security-events: write
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔄 Restore packages
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: 🛡️ Run security audit
+      run: |
+        echo "🛡️ Running security audit..."
+        dotnet list ${{ env.SOLUTION_PATH }} package --vulnerable --include-transitive 2>&1 | tee security-audit.log
+        
+        # Check if vulnerabilities were found
+        if grep -q "has the following vulnerable packages" security-audit.log; then
+          echo "⚠️ Security vulnerabilities found!"
+          echo "## 🚨 Security Vulnerabilities Found" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following vulnerable packages were detected:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          grep -A 20 "has the following vulnerable packages" security-audit.log >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        else
+          echo "✅ No security vulnerabilities found"
+          echo "## ✅ Security Audit Passed" >> $GITHUB_STEP_SUMMARY
+          echo "No security vulnerabilities were found in the project dependencies." >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: 📤 Upload security audit results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-audit-${{ github.run_number }}
+        path: security-audit.log
+        retention-days: 30
+
+  notify-completion:
+    name: 📢 Notify Completion
+    runs-on: ubuntu-latest
+    needs: [check-updates, update-dependencies, security-audit]
+    if: always()
+    
+    steps:
+    - name: 📋 Workflow Summary
+      run: |
+        echo "## 📦 Dependency Update Workflow Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Results:" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔍 Updates Available: ${{ needs.check-updates.outputs.has-updates == 'true' && '✅ Yes' || '❌ No' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🔄 Dependencies Updated: ${{ needs.update-dependencies.result == 'success' && '✅ Success' || needs.update-dependencies.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- 🛡️ Security Audit: ${{ needs.security-audit.result == 'success' && '✅ Passed' || '❌ Failed' }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ needs.check-updates.outputs.has-updates }}" == "true" ]; then
+          echo "### 📦 Available Updates:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ needs.check-updates.outputs.updates-summary }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "A pull request has been created with the dependency updates." >> $GITHUB_STEP_SUMMARY
+        else
+          echo "### ✅ All dependencies are up to date!" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔗 Next Steps:" >> $GITHUB_STEP_SUMMARY
+        echo "- Review any created pull requests" >> $GITHUB_STEP_SUMMARY
+        echo "- Check security audit results" >> $GITHUB_STEP_SUMMARY
+        echo "- Monitor build and test results" >> $GITHUB_STEP_SUMMARY 

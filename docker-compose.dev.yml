@@ -1,50 +1,46 @@
-version: '3.8'
-
 services:
   healthy-api:
     build:
-      context: ./Healthy.Api
+      context: ./Healthy
       dockerfile: Healthy.Api/Dockerfile
-      target: base  # Use base stage for development
+      target: build
+    ports:
+      - "5001:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - DOTNET_USE_POLLING_FILE_WATCHER=true
       - DOTNET_RUNNING_IN_CONTAINER=true
-      - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB_Dev;User Id=sa;Password=Dev@Passw0rd123;TrustServerCertificate=true;
+      - ASPNETCORE_LOGGING__CONSOLE__DISABLECOLORS=true
+      - ConnectionStrings__DefaultConnection=Server=healthy-db,1433;Database=HealthyDB;User Id=sa;Password=Dev@Passw0rd123!;TrustServerCertificate=true;Encrypt=false
     volumes:
-      # Mount source for live development
-      - ./Healthy.Api:/src
+      - ./Healthy:/src
       - /src/Healthy.Api/bin
       - /src/Healthy.Api/obj
-    ports:
-      - "5000:8080"
+      - /src/Healthy.Application/bin
+      - /src/Healthy.Application/obj
+      - /src/Healthy.Domain/bin
+      - /src/Healthy.Domain/obj
+      - /src/Healthy.Infrastructure/bin
+      - /src/Healthy.Infrastructure/obj
+    working_dir: /src
+    command: ["dotnet", "watch", "run", "--project", "Healthy.Api/Healthy.Api.csproj", "--urls", "http://+:8080", "--no-restore"]
     depends_on:
       - healthy-db
-    networks:
-      - healthy-network
+    restart: unless-stopped
 
   healthy-db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      SA_PASSWORD: "Dev@Passw0rd123"
-      ACCEPT_EULA: "Y"
-      MSSQL_PID: "Express"
+      - SA_PASSWORD=Dev@Passw0rd123
+      - ACCEPT_EULA=Y
+      - MSSQL_PID=Express
     ports:
       - "1433:1433"
     volumes:
-      - healthy-db-dev-data:/var/opt/mssql
-    networks:
-      - healthy-network
-
-  # Remove nginx and redis for simple development
-  # healthy-redis:
-  # healthy-nginx:
-
-networks:
-  healthy-network:
-    driver: bridge
+      - healthy-db-data:/var/opt/mssql
+    restart: unless-stopped
 
 volumes:
-  healthy-db-dev-data:
-    driver: local
+  healthy-db-data:
+ 

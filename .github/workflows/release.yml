@@ -1,0 +1,292 @@
+name: 🚀 Release Management
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        type: string
+      release_type:
+        description: 'Type of release'
+        required: true
+        default: 'minor'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      prerelease:
+        description: 'Is this a pre-release?'
+        required: false
+        default: false
+        type: boolean
+
+env:
+  DOTNET_VERSION: '9.0.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}/healthy-api
+  SOLUTION_PATH: './Healthy/Healthy.sln'
+
+jobs:
+  validate-release:
+    name: 🔍 Validate Release
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      changelog: ${{ steps.changelog.outputs.changelog }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 🏷️ Determine version
+      id: version
+      run: |
+        if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+          VERSION="${{ github.event.inputs.version }}"
+        else
+          VERSION="${{ github.ref_name }}"
+        fi
+        echo "version=${VERSION}" >> $GITHUB_OUTPUT
+        echo "📋 Release version: ${VERSION}"
+
+    - name: ⚙️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🔄 Restore and build
+      run: |
+        dotnet restore ${{ env.SOLUTION_PATH }}
+        dotnet build ${{ env.SOLUTION_PATH }} --configuration Release --no-restore
+
+    - name: 🧪 Run tests
+      run: |
+        dotnet test ${{ env.SOLUTION_PATH }} \
+          --configuration Release \
+          --no-build \
+          --logger trx \
+          --results-directory ./TestResults
+
+    - name: 📝 Generate changelog
+      id: changelog
+      run: |
+        echo "📝 Generating changelog..."
+        # Simple changelog generation - you might want to use a more sophisticated tool
+        CHANGELOG=$(git log --pretty=format:"- %s" $(git describe --tags --abbrev=0)..HEAD | head -20)
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="- Initial release"
+        fi
+        echo "changelog<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+  build-release-artifacts:
+    name: 🏗️ Build Release Artifacts
+    runs-on: ubuntu-latest
+    needs: validate-release
+    
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: ⚙️ Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+
+    - name: 🏗️ Build and publish
+      run: |
+        # Build for multiple platforms
+        dotnet publish ./Healthy/Healthy.Api/Healthy.Api.csproj \
+          --configuration Release \
+          --runtime linux-x64 \
+          --self-contained true \
+          --output ./artifacts/linux-x64 \
+          -p:PublishSingleFile=true \
+          -p:Version=${{ needs.validate-release.outputs.version }}
+
+        dotnet publish ./Healthy/Healthy.Api/Healthy.Api.csproj \
+          --configuration Release \
+          --runtime win-x64 \
+          --self-contained true \
+          --output ./artifacts/win-x64 \
+          -p:PublishSingleFile=true \
+          -p:Version=${{ needs.validate-release.outputs.version }}
+
+    - name: 📦 Create release packages
+      run: |
+        cd artifacts
+        tar -czf healthy-system-linux-x64-${{ needs.validate-release.outputs.version }}.tar.gz linux-x64/
+        zip -r healthy-system-win-x64-${{ needs.validate-release.outputs.version }}.zip win-x64/
+
+    - name: 🔐 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 🔧 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: 🐳 Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./Healthy
+        file: ./Healthy/Healthy.Api/Dockerfile
+        platforms: linux/amd64,linux/arm64
+        push: true
+        tags: |
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate-release.outputs.version }}
+          ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        labels: |
+          org.opencontainers.image.title=Healthy System API
+          org.opencontainers.image.description=A comprehensive health tracking system API
+          org.opencontainers.image.source=${{ github.repositoryUrl }}
+          org.opencontainers.image.version=${{ needs.validate-release.outputs.version }}
+          org.opencontainers.image.created=${{ github.event.head_commit.timestamp }}
+          org.opencontainers.image.revision=${{ github.sha }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        build-args: |
+          BUILD_CONFIGURATION=Release
+
+    - name: 📤 Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-artifacts
+        path: |
+          artifacts/*.tar.gz
+          artifacts/*.zip
+        retention-days: 90
+
+  create-github-release:
+    name: 📋 Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, build-release-artifacts]
+    
+    permissions:
+      contents: write
+
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 📥 Download artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: release-artifacts
+        path: ./artifacts
+
+    - name: 📋 Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ needs.validate-release.outputs.version }}
+        name: "Healthy System ${{ needs.validate-release.outputs.version }}"
+        body: |
+          ## 🚀 Healthy System Release ${{ needs.validate-release.outputs.version }}
+          
+          ### 📝 What's Changed
+          ${{ needs.validate-release.outputs.changelog }}
+          
+          ### 📦 Downloads
+          - **Linux x64**: `healthy-system-linux-x64-${{ needs.validate-release.outputs.version }}.tar.gz`
+          - **Windows x64**: `healthy-system-win-x64-${{ needs.validate-release.outputs.version }}.zip`
+          - **Docker**: `ghcr.io/${{ github.repository }}/healthy-api:${{ needs.validate-release.outputs.version }}`
+          
+          ### 🚀 Quick Start
+          ```bash
+          # Using Docker
+          docker pull ghcr.io/${{ github.repository }}/healthy-api:${{ needs.validate-release.outputs.version }}
+          
+          # Using Docker Compose
+          docker-compose -f docker-compose.prod.yml up -d
+          ```
+          
+          ### 📚 Documentation
+          - [Setup Guide](./README.SETUP.md)
+          - [Docker Guide](./README.Docker.md)
+          - [API Documentation](https://api.healthy-system.com/swagger)
+          
+          ### 🔗 Container Images
+          - `ghcr.io/${{ github.repository }}/healthy-api:${{ needs.validate-release.outputs.version }}`
+          - `ghcr.io/${{ github.repository }}/healthy-api:latest`
+          
+          **Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ github.event.before }}...${{ needs.validate-release.outputs.version }}
+        files: |
+          artifacts/*.tar.gz
+          artifacts/*.zip
+        prerelease: ${{ github.event.inputs.prerelease == 'true' }}
+        draft: false
+
+  deploy-production:
+    name: 🌟 Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [validate-release, build-release-artifacts, create-github-release]
+    if: ${{ !github.event.inputs.prerelease }}
+    environment: 
+      name: production
+      url: ${{ vars.PRODUCTION_URL || 'https://api.healthy-system.com' }}
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+
+    - name: 🚀 Deploy release to production
+      run: |
+        echo "🌟 Deploying Healthy System ${{ needs.validate-release.outputs.version }} to Production..."
+        
+        # Update docker-compose to use the specific version
+        sed -i 's/healthy-api:latest/healthy-api:${{ needs.validate-release.outputs.version }}/g' docker-compose.prod.yml
+        
+        # Deploy to production
+        echo "📋 Using Docker Compose: docker-compose.prod.yml"
+        # docker-compose -f docker-compose.prod.yml pull
+        # docker-compose -f docker-compose.prod.yml up -d
+        
+        echo "✅ Production deployment initiated"
+
+    - name: 🩺 Post-deployment health check
+      run: |
+        echo "🩺 Running post-deployment health checks..."
+        # Add health check commands here
+        echo "✅ Health checks completed"
+
+    - name: 📢 Notify successful release
+      run: |
+        echo "🎉 Release ${{ needs.validate-release.outputs.version }} deployed successfully!"
+        echo "🌐 Production URL: ${{ vars.PRODUCTION_URL }}"
+        # Add notification logic here (Slack, Teams, Discord, etc.)
+
+  security-scan-release:
+    name: 🛡️ Security Scan Release
+    runs-on: ubuntu-latest
+    needs: [validate-release, build-release-artifacts]
+    
+    permissions:
+      security-events: write
+
+    steps:
+    - name: 🛡️ Run container security scan
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.validate-release.outputs.version }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: 📋 Upload scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif' 

@@ -6,7 +6,6 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Server=healthy-db;Database=HealthyDB;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true;
-      - ConnectionStrings__RedisConnection=healthy-redis:6379
     # Remove volume mounts for production
     volumes: []
     # Only expose internal port
@@ -36,18 +35,6 @@ services:
         reservations:
           cpus: '1.0'
           memory: 1G
-
-  healthy-redis:
-    # Don't expose Redis port externally in production
-    ports: []
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
 
   healthy-nginx:
     ports:
