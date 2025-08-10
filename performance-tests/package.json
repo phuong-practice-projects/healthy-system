@@ -1,0 +1,19 @@
+{
+  "name": "healthy-system-performance-tests",
+  "version": "1.0.0",
+  "description": "Performance testing suite for Healthy System API",
+  "main": "load-test-functions.js",
+  "scripts": {
+    "test": "artillery run load-test.yml",
+    "test:quick": "artillery quick --count 10 --num 5 http://localhost:5001/health",
+    "test:report": "artillery run load-test.yml --output results.json && artillery report results.json",
+    "install-artillery": "npm install -g artillery@latest"
+  },
+  "dependencies": {
+    "artillery": "^2.0.0"
+  },
+  "devDependencies": {},
+  "keywords": ["performance", "testing", "api", "healthy-system"],
+  "author": "Healthy System Team",
+  "license": "MIT"
+}

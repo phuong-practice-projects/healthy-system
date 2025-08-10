@@ -11,6 +11,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container
 builder.Services.AddControllers();
 
+// Add health checks
+builder.Services.AddHealthChecks();
+
 // Add custom CORS
 builder.Services.AddCustomCors(builder.Environment);
 
@@ -66,6 +69,9 @@ app.UseAuthorization();
 app.UseCustomMiddlewares();
 
 app.MapControllers();
+
+// Add health check endpoint
+app.MapHealthChecks("/health");
 
 // Print startup information
 ApplicationExtensions.PrintStartupInfo(app.Environment);

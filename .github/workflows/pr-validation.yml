@@ -10,6 +10,7 @@ env:
   SOLUTION_PATH: './Healthy/Healthy.sln'
   API_PROJECT_PATH: './Healthy/Healthy.Api/Healthy.Api.csproj'
   TEST_PROJECT_PATH: './Healthy/Healthy.Tests.Unit/Healthy.Tests.Unit.csproj'
+  INFRASTRUCTURE_PROJECT_PATH: './Healthy/Healthy.Infrastructure/Healthy.Infrastructure.csproj'
 
 jobs:
   changes:

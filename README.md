@@ -143,13 +143,25 @@ healthy-system/
 
 ## 🔧 Development Workflow
 
+### 🛠️ Quick Start Scripts
+```bash
+# Setup development environment
+./scripts/setup-dev.sh
+
+# Validate CI/CD pipeline
+./scripts/validate-cicd.sh
+```
+
 ### 🛠️ Initial Setup (First Time)
 1. **Clone**: `git clone <repository-url>`
 2. **Navigate**: `cd healthy-system`
-3. **Environment**: Copy `.env.example` → `.env.development`
-4. **Database**: `docker-compose -f docker-compose.dev.yml up -d`
-5. **Migrate**: `dotnet ef database update --project Healthy.Infrastructure`
-6. **Run**: `cd Healthy && dotnet run --project Healthy.Api`
+3. **Run Setup**: `./scripts/setup-dev.sh` (automated setup)
+   
+   Or manual setup:
+4. **Environment**: Copy `.env.example` → `.env.development`
+5. **Database**: `docker-compose -f docker-compose.dev.yml up -d`
+6. **Migrate**: `dotnet ef database update --project Healthy.Infrastructure`
+7. **Run**: `cd Healthy && dotnet run --project Healthy.Api`
 
 ### � Daily Development
 1. **Pull latest**: `git pull origin main`
@@ -162,6 +174,15 @@ healthy-system/
 1. **Build**: `docker-compose -f docker-compose.prod.yml build`
 2. **Deploy**: `docker-compose -f docker-compose.prod.yml up -d`
 3. **Verify**: Check health endpoints and logs
+
+### 🤖 CI/CD Pipeline
+- **Automated Building**: .NET 9.0 with comprehensive testing
+- **Security Scanning**: SAST, dependency checks, container scanning
+- **Performance Testing**: Artillery load testing
+- **Multi-Environment**: Development and production deployments
+- **Quality Gates**: Code coverage, security, and performance thresholds
+
+For detailed CI/CD information, see [docs/CI-CD.md](docs/CI-CD.md)
 
 ---
 
@@ -183,13 +204,16 @@ healthy-system/
 - 🔍 **Advanced Filtering** and pagination
 - � **RESTful API Design** with OpenAPI/Swagger
 
-### 🏗️ Technical Stack
+### 🔧 Technical Stack
 - ⚡ **Clean Architecture** with CQRS pattern
 - 🎯 **MediatR** for command/query handling  
 - 🗄️ **Entity Framework Core** with SQL Server
-- 🐳 **Docker** containerization
+- 🐳 **Docker** containerization with multi-stage builds
 - 🔄 **Database Migrations** with versioning
 - 🧪 **Unit Testing** with xUnit
+- 🚀 **CI/CD Pipeline** with GitHub Actions
+- 🛡️ **Security Scanning** with CodeQL, Snyk, and Trivy
+- ⚡ **Performance Testing** with Artillery
 
 ---
 
@@ -205,6 +229,9 @@ healthy-system/
 | **Migrations** | [README.Migrations.md](README.Migrations.md) | Database versioning & updates |
 | **Environment** | [README.Environment.md](README.Environment.md) | Configuration management |
 | **Docker** | [README.Docker.md](README.Docker.md) | Containerization & deployment |
+| **CI/CD Pipeline** | [docs/CI-CD.md](docs/CI-CD.md) | Complete CI/CD pipeline documentation |
+| **Performance Testing** | [performance-tests/README.md](performance-tests/README.md) | Load testing and performance monitoring |
+| **Security Policy** | [SECURITY.md](SECURITY.md) | Security guidelines and vulnerability reporting |
 
 ---
 
@@ -220,7 +247,9 @@ healthy-system/
 - **Documentation**: Start with relevant README files above
 - **Issues**: Create GitHub issue with detailed description
 - **Architecture Questions**: Refer to [README.Architecture.md](README.Architecture.md)
-- **Security Concerns**: See [README.Authorization.md](README.Authorization.md)
+- **Security Concerns**: See [README.Authorization.md](README.Authorization.md) and [SECURITY.md](SECURITY.md)
+- **CI/CD Help**: Check [docs/CI-CD.md](docs/CI-CD.md)
+- **Performance Issues**: See [performance-tests/README.md](performance-tests/README.md)
 
 ---
 
